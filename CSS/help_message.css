@@ -1,0 +1,44 @@
+.tooltip { 
+  position: relative;     /* Делаем элемент родительским для всплывающих подсказок */
+}
+span.help_message{
+  position: absolute;     /* Выводим элемент из потока */
+  margin-left: -30000px;  /* И прячем далеко за краем экрана */
+}
+.tooltip:hover span {     /* При наведении */
+  margin-left: 0;         /* Возвращаем из далекого заэкранного края блок на место */
+  width: 200px;           /* Задаем ширину */
+  z-index: 1000;          /* Помещаем на самый верх */
+                          /* Позиционируем относительно родительского блока */
+  top:30px;               /* Отступ сверху */  
+  left:30px;              /* Отступ слева */          
+}
+.tooltip { 
+  cursor: help;
+}
+.tooltip span{ 
+  background-color: #3f3f3f; /* Фон всплывающего блока*/
+  color: #fafafa;             /* Цвет текста */
+  text-align: left;
+  padding:10px;                 /* Отступы */
+  font-size: 13px;
+  line-height: 1.1em;
+}
+.tooltip span{                 /* Закругляем уголки */
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+}
+.tooltip span:after{
+  content: '';            /* Добавили контент */ 
+  width:0;                /* Спрятали его, превратив в 0 */
+  height:0;
+  border-bottom: 10px solid #3f3f3f;  /* Нижним бордером задаем цвет и высоту треугольника */
+  border-right: 30px solid transparent; /* Правым - ширину треугольника вправо */
+  position: absolute;     /* Позиционируем относительно родительского блока */
+  top:-10px;
+  left:10px;
+}
+ul{
+	list-style: square inside;
+}

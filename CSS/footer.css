@@ -1,0 +1,27 @@
+footer{
+	position: fixed;
+	bottom: 0;
+	background:  rgb(125, 125, 125);
+	width: 960px;
+	height: 3em;
+	text-align: center;
+	font-size: 11px;
+	color: #fff;
+	box-shadow: 3px 0 3px grey;
+}
+#footer-nav li{
+	display:inline-block;
+	width: 60px;
+	margin-right: 10px;
+}
+#footer-nav a{
+    	display:block;
+	color:#fff;
+	text-decoration: none;
+	text-align: center;
+	border-bottom: 1px dotted #fff;
+}
+#footer-nav a:hover{
+	font-weight: bold;
+	border-bottom: 1px solid #fff;
+}

@@ -1,0 +1,45 @@
+#show_data{
+	background: rgb(187, 202, 232);
+	-moz-border-radius: 0 0 10px 10px;
+	-webkit-border-radius: 0 0 10px 10px;
+	border-radius: 0 0 10px 10px;
+	box-shadow: 3px 3px 3px grey;
+}	
+div#canvas{
+	padding-top: 5px;
+	padding-bottom: 5px;
+}
+canvas#drawpage{
+	display: block;
+	margin: 0 auto;
+	background: #fff;	
+}
+
+#show_result{
+	display: none;
+	background-color: #5274AA;
+	color:#fff;
+	font-size: 1.2em;
+	background: linear-gradient(to top, #0A64A4, rgb(187, 202, 232));
+	text-align: center;
+	-moz-border-radius: 0 0 10px 10px;
+	-webkit-border-radius: 0 0 10px 10px;
+	border-radius: 0 0 10px 10px;
+	box-shadow: 3px 3px 3px grey;
+	margin-bottom: 40px;
+}
+#show_result_positive, #show_result_negative{
+	display: none;
+}
+#show_result input[type="text"]{
+	text-align: right;
+	color: black;
+
+	background: none;
+	height: 20px;
+	width: 55px;
+	margin: 0;
+	padding: 0;	
+	border: none;
+	border-radius: none;
+}

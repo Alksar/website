@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8>
+  <title> ПРОБА </title>
+  <link rel="stylesheet" href="CSS/screen_calcpage.css">
+  <!--[if lt IE 9]>
+	<script src="html5shiv/dist/html5shiv"></script>
+  <![endif]-->
+  <style>
+	body{
+		background-image: url('images/bg3.jpg');
+	}
+	#show_data{
+		-moz-border-radius: 0 0 0 0;
+		-webkit-border-radius: 0 0 0 0;
+		border-radius: 0 0 0 0;
+	}
+  </style>
+  
+</head>
+
+<body>
+
+<div id="wrap">
+<header class="group">
+<nav>
+  <ul id="main-nav">
+    <li><a href="#">главная</a></li>
+	<li><a href="#">линии уровня</a></li>
+	<li><a href="#">тестовая функция</a></li>
+	<li class="active"><a href="#">поиск минимума</a></li>
+	<li><a href="#">о нас</a></li>
+  </ul>
+</nav>
+</header>
+<div id="wrap-content">
+<div class="group">
+
+<div id="entry">
+	<p>Заменить этот текст описанием ввода данных, работы алгоритма, ... , ...</p>
+</div>
+<div id="input_data">
+
+ <form method="post" action="handler.php">
+	<label for="metod-field"><span class="tooltip">метод<span class="help_message">Ноль</span></span></label>
+	<select id="metod-field" name="metod-field">
+				<option selected="selected" disabled="disabled">Выберите метод</option>
+				<option value="Sanya">Случайного поиска(лучшее из 40 направлений, поиск минимума в направлении)</option>
+				<option value="Deneir">Случайного поиска(лучшее направление из 40, поиск с постоянным шагом)</option>
+				<option value="Light">Случайного поиска(до первого допустимого направления)</option>
+				<option value="Makar">Метод сопряженных направлений</option>
+	</select>
+	</br>
+	<label for="function-field"><span class="tooltip">функция y=<span class="help_message">Раз</span></span></label>
+	<span style="color:black;"></span><input type="text" name="function-field" id="function-field" placeholder="например x1^2+x2^2">
+	<div id="Sanya-form" style="display: none;">
+		<label for="x1-field"><span class="tooltip">интервал x1<span class="help_message">Два</span></span></label>
+		<input type="text" name="x1-field" id="x1-field" placeholder="0-0">
+	</div>
+	<div id="Deneir-form">
+		<label for="dx1-field"><span class="tooltip">dx1<span class="help_message">Три</span></span></label>
+		<input type="text" name="dx1-field" id="dx1-field" placeholder="0">
+	</div>
+	<div id="Light-form">
+	
+	</div>
+	<div id="Makar-form">
+	
+	</div>
+	
+<!--<table>
+	<tr>
+		<td width="149" align="left"><label for="metod-field"><span class="tooltip">метод<span class="help_message">Ноль</span></span></label></td>
+		<td colspan="3">
+			<select id="metod-field" name="metod-field">
+				<option selected="selected" disabled="disabled">Выберите метод</option>
+				<option value="Sanya">Случайного поиска(лучшее из 40 направлений, поиск минимума в направлении)</option>
+				<option value="Deneir">Случайного поиска(лучшее направление из 40, поиск с постоянным шагом)</option>
+				<option value="Light">Случайного поиска(до первого допустимого направления)</option>
+				<option value="Makar">Метод сопряженных направлений</option>
+			</select>
+		</td>
+	</tr> 
+	<tr>
+		<td align="left"><label for="function-field"><span class="tooltip">функция y=<span class="help_message">Раз</span></span></label></td>
+		<td colspan="3"><span style="color:black;"></span><input type="text" name="function-field" id="function-field" placeholder="например x1^2+x2^2"></td>
+	</tr> 
+	<tr> 
+     <td align="left"><label for="x1-field"><span class="tooltip">интервал x1<span class="help_message">Два</span></span></label></td>
+     <td width="100"><input type="text" name="x1-field" id="x1-field" placeholder="0-0"></td>
+	 <td width="149" align="right"><label for="dx1-field"><span class="tooltip">dx1<span class="help_message">Три</span></span></label></td>
+	 <td width="100" align="right"><input type="text" name="dx1-field" id="dx1-field" placeholder="0"></td>
+    </tr>
+	<tr> 
+     <td align="left"><label for="C-field"><span class="tooltip">интервал C<span class="help_message">Четыре</span></span></label></td>
+     <td><input type="text" name="C-field" id="C-field" placeholder="0 - 0"></td>
+	 <td align="right"><label for="dC-field"><span class="tooltip">dC<span class="help_message">Пять</span></span></label></td>
+	 <td align="right"><input type="text" name="dC-field" id="dC-field" placeholder="0"></td>
+    </tr>
+	<tr> 
+     <td align="left"><label for="Eps-field"><span class="tooltip">точность<span class="help_message">Шесть</span></span></label></td>
+     <td><input type="text" name="Eps-field" id="Eps-field" placeholder="0"></td>
+	 <td align="right"><label for="dx2-field"><span class="tooltip">dx2<span class="help_message">Семь</span></span></label></td>
+	 <td align="right"><input type="text" name="dx2-field" id="dx2-field" placeholder="0"></td>
+    </tr>
+	<tr> 
+     <td colspan="2"><input type="reset" value="сброс" name="reset-data" id="reset-data"></td>
+     <td colspan="2"><input type="submit" value="построить" name="calc-data" id="calc-data"></td>
+    </tr>    
+   </table> !-->
+ <script src="JS/script1.js"></script>
+ <script src="JS/GoldenSection.js"></script>
+ <script>
+   var f=5.3, b=.3, c=3.;
+   
+   var RegularExpression = /[a-zA-Z]+([0-9]*[a-zA-Z]*)*/;
+   var anotherReg = /^[\+\-]?[0-9];[\+\-]?[0-9]$/;
+   
+   var a=+'sa12';
+   var r="три";
+   var str_temp='|x^2+y^2|'.replace(/[a-zA-Z]+([0-9]*[a-zA-Z]*)*/g, '1');
+   str_temp=str_temp.replace(/\|/g, '');
+   var q={x: 1, y: 1};
+   var w={x: -2, y: -2};
+	function Distance(a, b){
+		return (Math.sqrt(Math.pow((a.x-b.x),2)+Math.pow((a.y-b.y),2)));
+	}
+	var str_res="1[          1(               2q 3w 4r 5s 6z 1t 1] 1)";
+	//str_res=str_res.replace(/\](?=[a-zA-Z0-9\(\[])/g, ']*');
+	//str_res=str_res.replace(/([a-zA-Z])(?=[\(\[])/g, '$1*');
+   str_res=str_res.replace(/([0-9])(?=[a-zA-Z\(\[])/g, '$1*');
+   
+   
+   
+   
+   
+   function TransformStrInMathStr(str){
+		var str_res=str;
+		str_res=str_res.replace(/\s/g, '');//пробелы удалены
+		str_res=ReplaceModulesOnBrackets(str_res,'[',']');//теперь открывающие и закрывающие модули имеют вид: [,]
+		
+		//вставляем знак '*' в нужные места
+		str_res=str_res.replace(/\](?=[a-zA-Z0-9\(\[])/g, ']*');
+		str_res=str_res.replace(/\)(?=[a-zA-Z0-9\(\[])/g, ')*');
+		str_res=str_res.replace(/([a-zA-Z])(?=[\(\[])/g, '$1*');
+		str_res=str_res.replace(/([0-9])(?=[a-zA-Z\(\[])/g, '$1*');
+		
+		//Заменить модули [] на Math.abs() , регулярка?
+		//Заменить a^b на Math.pow(a,b)
+		
+		
+		return (str_res);		
+	}//Transform
+	
+   
+   //Если модули в функции str_func расставленны однозначно - заменяет их на соответствующие скобки"(,)", возвращает измененную строку
+	//Если модули в функции str_func расставленны не однозначно - возвращает false
+	function ReplaceModulesOnBrackets(str_func,leftBracket, rightBracket){
+		var str_temp=str_func;
+		var leftModuleFoundCount=0, rightModuleFoundCount=0,moduleCount=0;
+		var result;
+		
+		for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++)
+			if (str_temp[strIndex]=='|') moduleCount++;
+		if (moduleCount==0) {return str_temp;}//если нет модулей, то все верно и возвращается неизмененная строка
+		if (moduleCount%2!=0) {return false;}//если модулей нечетное кол-во, то ошибка, результат - false
+				
+		//Первый модуль - левый, последний модуль - правый
+		var i=0, moduleFound=false;
+		while((i<str_temp.length) && (!moduleFound)){
+			if (str_temp[i]=='|'){
+				moduleFound=true;
+				str_temp=str_temp.substring(0, i)+leftBracket+str_temp.substring(i+1);//Т.к. строки не изменяемые и нельзя написать str_temp[i]='(';, то используется такой метод
+				leftModuleFoundCount++;
+	       	}
+			i++;
+		}
+		moduleFound=false;
+		i=str_temp.length-1;
+		while((0<=i) && (!moduleFound)){
+			if (str_temp[i]=='|'){
+				moduleFound=true;
+				str_temp=str_temp.substring(0, i)+rightBracket+str_temp.substring(i+1);//Т.к. строки не изменяемые и нельзя написать str_temp[i]=')';, то используется такой метод
+				rightModuleFoundCount++;
+			}
+			i--;
+		}
+								
+		for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++){
+			if (str_temp[strIndex]!='|') continue;
+			if (TypeOfModule()==-1) {
+				str_temp=str_temp.substring(0, strIndex)+leftBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]='(';, то используется такой метод
+				leftModuleFoundCount++;
+			}
+			else if (TypeOfModule==1) {
+				str_temp=str_temp.substring(0, strIndex)+rightBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]=')';, то используется такой метод 
+				rightModuleFoundCount++;
+			}
+		}
+			
+				
+		if (leftModuleFoundCount==(moduleCount/2)){
+			for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++) 
+				if (str_temp[strIndex]=='|') str_temp=str_temp.substring(0, strIndex)+rightBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]=')';, то используется такой метод
+			return str_temp;
+		}
+		if (rightModuleFoundCount==(moduleCount/2)){
+			for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++) 
+				if (str_temp[strIndex]=='|') str_temp=str_temp.substring(0, strIndex)+leftBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]='(';, то используется такой метод
+			return str_temp;
+		}
+		
+		return false;	
+		//---------------------------------------------------------------------------------
+		//Если str_temp[strIndex] левый модуль, возвращает -1
+		//Если str_temp[strIndex] правый модуль, возвращает 1
+		//Если str_temp[strIndex] непонятно, возвращает 0
+		function TypeOfModule(){
+			var res=0;
+			if ((str_temp[strIndex-1]=='-') || (str_temp[strIndex-1]=='+') || (str_temp[strIndex-1]=='*') || (str_temp[strIndex-1]=='/') || (str_temp[strIndex-1]=='^') || (str_temp[strIndex-1]=='('))
+				res=-1;
+			if ((str_temp[strIndex+1]=='^') || (str_temp[strIndex+1]==')') || (str_temp[strIndex+1]=='*') || (str_temp[strIndex+1]=='/'))
+				res=1;					
+			return res;
+		}
+	}//ReplaceModulesOnBrackets
+   
+   var str_test1="[x1+[[5-4x2]+[x3-1]]]", str_test2;
+   str_test2=str_test1.replace(/\[([^\[\]]+)\]/, 'Math.abs($1)');
+   while (str_test1!=str_test2){
+	str_test1=str_test2;
+	str_test2=str_test1.replace(/\[([^\[\]]+)\]/, 'Math.abs($1)');   
+   }
+   //str_test1= str_test1.replace(/\[([a-zA-Z]+)\]/g, 'Math.abs($1)');
+   
+   
+   //-----------------------------------------------------
+   
+   
+			var STROKA="(5*|x1+x2|-|x2|)^-2";
+			STROKA=TransformStrInMathStr(STROKA);
+			
+		function TransformStrInMathStr(str){
+		var str_res=str;
+		str_res=str_res.replace(/\s/g, '');//пробелы удалены
+		str_res=ReplaceModulesOnBrackets(str_res,'[',']');//теперь открывающие и закрывающие модули имеют вид: [,]
+		
+		//вставляем знак '*' в нужные места
+		str_res=str_res.replace(/\](?=[a-zA-Z0-9\(\[])/g, ']*');
+		str_res=str_res.replace(/\)(?=[a-zA-Z0-9\(\[])/g, ')*');
+		str_res=str_res.replace(/([a-zA-Z])(?=[\(\[])/g, '$1*');
+		str_res=str_res.replace(/([0-9])(?=[a-zA-Z\(\[])/g, '$1*');
+		
+		//Заменить a^b на Math.pow(a,b)
+		str_res=ReplacePow(str_res);
+		
+		//Заменить модули [] на Math.abs()
+		var str_temp;
+		str_temp=str_res.replace(/\[([^\[\]]+)\]/, 'Math.abs($1)');
+		while (str_temp!=str_res){
+			str_res=str_temp;
+			str_temp=str_res.replace(/\[([^\[\]]+)\]/, 'Math.abs($1)');   
+		}
+		str_res=str_temp;
+		
+		return (str_res);
+		
+		
+		//-----------------------------------------------------------------------------
+		function ReplacePow(str_func){
+			var str_temp=str_func, base="", exponent="";
+			var baseStartIndex=0, exponentFinishIndex=0; //Эти переменные нужны для того, чтобы вырезать подстроку baseStartIndex-exponentFinishIndex и вставить на ее место полученное верное выражение
+			
+			var i=0, str_tempLength=str_temp.length;
+			while (i<str_tempLength){
+				if (str_temp[i]=="^"){
+					GetBaseAndExponent();
+					str_temp=str_temp.substring(0, baseStartIndex)+"Math.pow("+base+","+exponent+")"+str_temp.substring(exponentFinishIndex+1);
+					i=baseStartIndex-1+10;
+				}
+				i++;		
+			}		
+			return (str_temp);
+			
+			
+			function GetBaseAndExponent(){
+				if ((str_temp[i]!="^") || (i<=0) || (i>=str_temp.length)) return false;
+				
+				var baseFound=false, exponentFound=false;
+				var base_temp="", exponent_temp="";
+				
+				if (str_temp[i-1]!=")" && str_temp[i-1]!="]"){
+					var index=i-1;
+					while ((index>=0) && !baseFound){	
+						baseFound=SimpleCriteriyStop();
+						if (!baseFound) {
+							base_temp=str_temp[index]+base_temp;
+							baseStartIndex=index;
+						}				
+						index--;
+					}
+					base=base_temp;
+				}
+				else{
+					if (str_temp[i-1]=="]"){
+						leftBracket="[";
+						rightBracket="]";						
+					}
+					else{
+						leftBracket="(";
+						rightBracket=")";	
+					}
+					var index=i-2;
+					base_temp=str_temp[i-1];
+					countOpenedBracets=1;
+					while ((index>=0) && !baseFound){
+						base_temp=str_temp[index]+base_temp;
+						baseStartIndex=index;
+						if (str_temp[index]==leftBracket){
+								countOpenedBracets--;
+						} 
+						else if (str_temp[index]==rightBracket) countOpenedBracets++;
+						if (countOpenedBracets==0) baseFound=true;
+						index--;
+					}
+					if (index>="Math.pow".length-1)
+						if (str_temp.substring(index-7, index+1)=="Math.pow"){//Такое условие из-за длинный выражения "Math.pow", чтобы захватить его, если оно есть
+							base_temp="Math.pow"+base_temp;
+							baseStartIndex=index-7;
+						}
+					base=base_temp;
+				}
+				    //Ниже начинается выделение показателя степени
+					if (str_temp[i+1]=="-" || str_temp[i+1]=="+"){
+						exponent_temp=exponent_temp+str_temp[i+1];
+						exponentFinishIndex=i+1;
+						i++;
+					}
+					if (str_temp[i+1]!="(" && str_temp[i+1]!="[" && str_temp.substring(i+1, i+9)!="Math.pow"){
+						var index=i+1;
+						
+						while ((index<str_temp.length) && !exponentFound){	
+							exponentFound=SimpleCriteriyStop();
+							if (!exponentFound) {
+								exponent_temp=exponent_temp+str_temp[index];
+								exponentFinishIndex=index;
+							}						
+							index++;
+						}	
+						exponent=exponent_temp;
+					}
+					else{
+						if (str_temp[i+1]=="["){
+							leftBracket="[";
+							rightBracket="]";						
+						}
+						else{
+							leftBracket="(";
+							rightBracket=")";	
+						}
+						var index=i+1;
+						if (str_temp[index]=="(" || str_temp[index]=="[") {
+							index++;
+							exponent_temp=exponent_temp+str_temp[index-1];
+							exponentFinishIndex=index-1;
+						}
+						countOpenedBracets=1;
+						if (str_temp.substring(i+1, i+9)=="Math.pow"){
+							index=i+10;
+							exponent_temp=exponent_temp+"Math.pow(";
+							exponentFinishIndex=i+9;
+						}
+						while ((index<str_temp.length) && !exponentFound){
+							exponent_temp=exponent_temp+str_temp[index];
+							exponentFinishIndex=index;
+							if (str_temp[index]==leftBracket){
+								countOpenedBracets++;
+							} 
+							else if (str_temp[index]==rightBracket) countOpenedBracets--;
+							if (countOpenedBracets==0) exponentFound=true;
+							index++;
+						}
+						exponent=exponent_temp;						
+					}
+					if (str_temp[i]=="-" || str_temp[i]=="+") i--;//возвращаем не правомерно измененный i
+				return;
+				//-----------------------------------------
+				function SimpleCriteriyStop(){
+					if ((str_temp[index]=='+') || (str_temp[index]=='-') || (str_temp[index]=='*') || (str_temp[index]=='/') || (str_temp[index]=='^') || (str_temp[index]==')') || (str_temp[index]=='(') || (str_temp[index]==']') || (str_temp[index]=='[')) return true;
+					return false;
+				}				
+			}//GetBaseAndExponent	
+		}//ReplacePow
+	}//Transform
+	
+	
+	
+	//Если модули в функции str_func расставленны однозначно - заменяет их на соответствующие скобки"(,)", возвращает измененную строку
+	//Если модули в функции str_func расставленны не однозначно - возвращает false
+	function ReplaceModulesOnBrackets(str_func,leftBracket, rightBracket){
+		var str_temp=str_func;
+		var leftModuleFoundCount=0, rightModuleFoundCount=0,moduleCount=0;
+		var result;
+		
+		for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++)
+			if (str_temp[strIndex]=='|') moduleCount++;
+		if (moduleCount==0) {return str_temp;}//если нет модулей, то все верно и возвращается неизмененная строка
+		if (moduleCount%2!=0) {return false;}//если модулей нечетное кол-во, то ошибка, результат - false
+				
+		//Первый модуль - левый, последний модуль - правый
+		var i=0, moduleFound=false;
+		while((i<str_temp.length) && (!moduleFound)){
+			if (str_temp[i]=='|'){
+				moduleFound=true;
+				str_temp=str_temp.substring(0, i)+leftBracket+str_temp.substring(i+1);//Т.к. строки не изменяемые и нельзя написать str_temp[i]='(';, то используется такой метод
+				leftModuleFoundCount++;
+	       	}
+			i++;
+		}
+		moduleFound=false;
+		i=str_temp.length-1;
+		while((0<=i) && (!moduleFound)){
+			if (str_temp[i]=='|'){
+				moduleFound=true;
+				str_temp=str_temp.substring(0, i)+rightBracket+str_temp.substring(i+1);//Т.к. строки не изменяемые и нельзя написать str_temp[i]=')';, то используется такой метод
+				rightModuleFoundCount++;
+			}
+			i--;
+		}
+								
+		for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++){
+			if (str_temp[strIndex]!='|') continue;
+			if (TypeOfModule()==-1) {
+				str_temp=str_temp.substring(0, strIndex)+leftBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]='(';, то используется такой метод
+				leftModuleFoundCount++;
+			}
+			else if (TypeOfModule==1) {
+				str_temp=str_temp.substring(0, strIndex)+rightBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]=')';, то используется такой метод 
+				rightModuleFoundCount++;
+			}
+		}
+			
+				
+		if (leftModuleFoundCount==(moduleCount/2)){
+			for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++) 
+				if (str_temp[strIndex]=='|') str_temp=str_temp.substring(0, strIndex)+rightBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]=')';, то используется такой метод
+			return str_temp;
+		}
+		if (rightModuleFoundCount==(moduleCount/2)){
+			for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++) 
+				if (str_temp[strIndex]=='|') str_temp=str_temp.substring(0, strIndex)+leftBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]='(';, то используется такой метод
+			return str_temp;
+		}
+		
+		return false;	
+		//---------------------------------------------------------------------------------
+		//Если str_temp[strIndex] левый модуль, возвращает -1
+		//Если str_temp[strIndex] правый модуль, возвращает 1
+		//Если str_temp[strIndex] непонятно, возвращает 0
+		function TypeOfModule(){
+			var res=0;
+			if ((str_temp[strIndex-1]=='-') || (str_temp[strIndex-1]=='+') || (str_temp[strIndex-1]=='*') || (str_temp[strIndex-1]=='/') || (str_temp[strIndex-1]=='^') || (str_temp[strIndex-1]=='('))
+				res=-1;
+			if ((str_temp[strIndex+1]=='^') || (str_temp[strIndex+1]==')') || (str_temp[strIndex+1]=='*') || (str_temp[strIndex+1]=='/'))
+				res=1;					
+			return res;
+		}
+	}//ReplaceModulesOnBrackets
+   
+   
+   var firstVariable="xx", secondVariable="yy";
+   
+   function GetFunctionValue(function_str, x1, x2){
+	
+		var value=0, function_str_temp=function_str;
+		
+		//alert(function_str_temp);
+		
+		function_str_temp=function_str_temp.replace(firstVariable,x1.toString());
+		function_str_temp=function_str_temp.replace(secondVariable,x2.toString());
+		
+		value=eval(function_str_temp);
+		//alert(value);
+		return value;
+	}
+	var aS=GetFunctionValue("Math.pow(xx,yy)",0,0);
+  
+   var MASS=[];
+   MASS[0]={point:{x:3,y:4}};
+   
+   var arab={x:0, y:0};
+   arab=GoldenSection("Math.pow(x1,2)+x2", {x:-2,y:-2}, {x:7,y:5}, 0.001);
+   
+	var asd={direct:{x:0,y:0}, tryPoint:{x:0, y:0}, funcValueInTryPoint:0, deltaFunc:0};
+		asd.direct.x=-1+2*Math.random();
+		asd.direct.y=-1+2*Math.random();	
+		asd.direct.x=asd.direct.x/Math.sqrt(Math.pow(asd.direct.x,2)+Math.pow(asd.direct.y,2));
+		asd.direct.y=asd.direct.y/Math.sqrt(Math.pow(asd.direct.x,2)+Math.pow(asd.direct.y,2));
+		asd.tryPoint.x=1;
+		asd.tryPoint.y=1;
+		asd.funcValueInTryPoint=1;
+		asd.deltaFunc=1.2;
+		
+		
+		var logArray=[];
+		var activeIndex=0, f={x:1, y:2};
+		
+		function CreateLog(Array, Index, x0){
+		//alert(activeIndex);
+		Array[Index]={point:{x:0, y:0}};
+		
+		Array[Index].point.x=x0.x;
+		Array[Index].point.y=x0.y;		
+		return;
+	}
+	
+	function TestDraw(){
+		var canvas=document.getElementById('drawpage');
+		var context=canvas.getContext('2d');
+		
+		context.fillStyle="red";
+
+		context.fillRect(20,20,6,6);
+		
+		context.lineWidth = 1;
+		context.strokeStyle = "rgb(100,100,100)";
+		context.moveTo(23,23);
+		for (var b=1; b<=5; b++){
+		context.lineTo(13*Math.pow(b,2),15*b);
+		context.fillRect(13*Math.pow(b,2),15*b,6,6);
+		}
+		context.stroke();
+		
+		
+	return;
+	}
+   
+   var btata="1-5".search(/\-[0-9]*\.?([0-9]*)?$/);
+   var ree=/\-([0-9]+\.?([0-9]*)?$)|(\.[0-9]+$)/;
+   var ctata="1-5".search(/5/);
+ </script>
+ <script>
+ var strr='-1--5';
+ //var r = strr[strr.lastIndexOf('-')-1]=='-' ? strr.substring(strr.lastIndexOf('-')) : strr.substring(strr.lastIndexOf('-')+1);
+ var r = parseFloat(strr);
+ 
+ var checkingData="-1--2";
+ var bool;
+ if (/^\-?[0-9]*\.?[0-9]*\-\-?[0-9]*\.?[0-9]*$/.test(checkingData) && !(/\-$/.test(checkingData)) && (checkingData[0]=='-' ? checkingData.lastIndexOf('-')!=0 : true)) {
+	bool=true;
+	}
+else bool=false;
+ 
+ function GetSupFunc(str_func, C){
+			var supfunction=str_func+'-'+C.toString();
+			
+			supfunction='Math.pow('+supfunction+',2)';
+			
+			return supfunction;
+		}
+ //меняет знак переданной функции на противоположный
+		function ReverseSignFunc(str_func){
+			var res_func="";
+			if (str_func[0]=='-' && str_func[1]=='(' && str_func[str_func.length-1]==')')
+				for (var i=2; i<str_func.length-1; i++)
+					res_func=res_func+str_func[i];
+			else res_func="-("+str_func+")";
+			return res_func;
+		}
+ 	//Возвращает значение функции function_str в точке (x1,x2)
+	function GetFunctionValue(function_str, x1, x2){
+		var value=0, function_str_temp=function_str;
+		
+		function_str_temp=function_str_temp.replace(firstVariable,'('+x1.toString()+')');
+		function_str_temp=function_str_temp.replace(secondVariable,'('+x2.toString()+')');
+		
+		value=eval(function_str_temp);
+
+		return value;
+	}
+function GoldenSection(func, a, b, eps){
+	//alert('новый поиск');
+	var x1={x:0,y:0}, x2={x:0,y:0}, fx1=0, fx2=0, fi=(1+Math.sqrt(5))/2,
+		leftBorder=a, rightBorder=b;
+
+		while(Math.sqrt(Math.pow(rightBorder.x-leftBorder.x,2)+Math.pow(rightBorder.y-leftBorder.y,2))>eps){
+			//alert('расстояние между точками '+Math.sqrt(Math.pow(rightBorder.x-leftBorder.x,2)+Math.pow(rightBorder.y-leftBorder.y,2)));
+			x1.x=rightBorder.x-(rightBorder.x-leftBorder.x)/fi;
+			x1.y=rightBorder.y-(rightBorder.y-leftBorder.y)/fi;
+			fx1=GetFunctionValue(func, x1.x, x1.y);
+			x2.x=leftBorder.x+(rightBorder.x-leftBorder.x)/fi;
+			x2.y=leftBorder.y+(rightBorder.y-leftBorder.y)/fi;
+			fx2=GetFunctionValue(func, x2.x, x2.y);
+			if (fx1>fx2){
+				leftBorder.x=x1.x;
+				leftBorder.y=x1.y;
+			}
+			else if (fx1<fx2) {
+				rightBorder.x=x2.x;
+				rightBorder.y=x2.y;
+			}
+			else {
+				leftBorder.x=x1.x;
+				leftBorder.y=x1.y;
+				rightBorder.x=x2.x;
+				rightBorder.y=x2.y;
+			}
+		}
+		//alert('расстояние между точками '+Math.sqrt(Math.pow(rightBorder.x-leftBorder.x,2)+Math.pow(rightBorder.y-leftBorder.y,2)));
+		alert((leftBorder.x+rightBorder.x)/2+';'+(leftBorder.y+rightBorder.y)/2);
+	return ({x: (leftBorder.x+rightBorder.x)/2, y: (leftBorder.y+rightBorder.y)/2});
+}
+ var aa={x:-5, y:-1};
+ var bb={x:-5, y:1};
+ var qq=GoldenSection('Math.pow(x1,2)+Math.pow(x2,2)', aa, bb, 0.01);
+ 
+ var Massiv=[];
+ Massiv[0]=[]
+ Massiv[0][0]=1;
+ Massiv[0][1]=2;
+ 
+ 
+ var proba=[];
+ proba[1]=4.5;
+ 
+ function ttest(){
+	if (!(proba[0])) alert('нету пробы 0= '+proba[0]);
+	alert('Проба1= '+proba[1]);
+ }
+ </script>
+ 
+   <input type="button" value="clickme" name="cal-data" id="cal-data" onClick="alert(ttest());">
+ </form> 
+</div>
+
+<div id="show_data">
+ <div id="canvas">
+	<canvas id="drawpage" width="498px" height="300px"></canvas>
+  </div>
+</div>
+
+</div>
+
+<div id="show_result">
+	Искомая точка минимума: [<input type="text" name="Show-first-cord" id="Show-first-cord" disabled="disabled"/>;<input type="text" name="Show-first-cord" id="Show-first-cord" disabled="disabled"/>]	Значение функци в точке минимума: y=<input type="text" name="Show-first-cord" id="Show-first-cord" disabled="disabled"/>;
+</div>
+</div>
+<footer>
+  <ul id="footer-nav">
+		<li><a href="#">главная</a></li>
+		<li><a href="#">контакты</a></li>
+		<li><a href="#">о нас</a></li>
+ </ul>
+ Все права защищены и охраняются законом. Copyright © ООО "Крутые парни" 2013+
+</footer>
+</div> <!-- wrap -->
+
+</body>
+</html>

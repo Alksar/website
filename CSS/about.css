@@ -1,0 +1,95 @@
+	@font-face {
+		font-family: Marianna;
+		src: url('images/about/fonts/Marianna.ttf');
+	}
+	
+	body {
+		background: #CCC url("images/about/paper/background.gif");
+	}
+	
+	#wrap-content{
+		padding: 40px;
+		font-size: 87.5%;
+		color: #333;	
+		font-family: Arial, Georgia, "Times New Roman", Times, serif;
+		line-height: 1.6;
+		-moz-border-image: url(images/about/paper/edge.png) 0 0 0 50 round; 
+		-webkit-border-image: url(images/about/paper/edge.png) 0 0 0 50 round; 
+		border-image: url(images/about/paper/edge.png) 0 0 0 50 round;
+		background: url(images/about/paper/paperlines.gif) #FBFBF9; /* IE, old FF */
+		background: url(images/about/paper/thumbtack.png) 50% 5px no-repeat, url(images/about/paper/stains1.png) 90% -20px no-repeat, url(images/about/paper/stains2.png) 30% 8% no-repeat, url(images/about/paper/stains3.png) 20% 50% no-repeat, url(images/about/paper/stains4.png) 40% 60% no-repeat, url(images/about/paper/paperlines.gif) #FBFBF9;
+		-moz-background-size: auto, auto, auto, auto, auto, auto 1.6em;
+		-webkit-background-size: auto, auto, auto, auto, auto, auto 1.6em;
+		background-size: auto, auto, auto, auto, auto, auto 1.6em; /* Chrome, Opera 10.5 */
+		-moz-background-clip: padding;
+		-webkit-background-clip: padding-box;
+		background-clip: padding-box; /* Chrome, Opera 10.5 */
+		-moz-box-shadow: 6px 5px 3px hsla(0,0%,0%,.2);
+		-webkit-box-shadow: 6px 5px 3px hsla(0,0%,0%,.2);
+		box-shadow: 6px 5px 3px hsla(0,0%,0%,.2);
+		
+	
+	}
+	
+	.article{
+		overflow: hidden;
+		margin-bottom: -30px;
+	}
+	.article .info{
+		position: relative;
+		margin-left: 250px;
+		margin-top: 30px;
+	}
+	#wrap-content .article img{
+		float: left;
+		clear: both;
+		
+		padding: 5px 5px 30px 5px;
+		background: #fff;
+		-moz-box-shadow: 3px 6px 8px -4px #999;
+		-webkit-box-shadow: 3px 6px 8px -4px #999;
+		box-shadow: 3px 6px 8px -4px #999;
+		
+		border: 1px solid rgb(254,254,254);	
+	}
+	#wrap-content .reverse img{
+		float: right;	
+	}
+	.reverse .info{
+		margin-left: 300px;
+	}
+	h1{
+		color: #414141;
+		font-family: Marianna, Helvetica, "Helvetica Neue", Arial, sans-serif;
+		font-size: 4em;
+		font-weight: normal;
+	}
+	.photo-Sanya{
+		-moz-transform: rotate(2deg);
+		-o-transform: rotate(2deg);
+		-webkit-transform: rotate(2deg);
+		transform: rotate(2deg);
+	}
+	.photo-Deneir{
+		-moz-transfo	rm: rotate(-2deg);
+		-o-transform: rotate(-2deg);
+		-webkit-transform: rotate(-2deg);
+		transform: rotate(-2deg);
+	}
+	.photo-Light{
+		-moz-transform: rotate(3deg);
+		-o-transform: rotate(3deg);
+		-webkit-transform: rotate(3deg);
+		transform: rotate(3deg);
+	}
+	.photo-Makar{
+		-moz-transform: rotate(-3deg);
+		-o-transform: rotate(-3deg);
+		-webkit-transform: rotate(-3deg);
+		transform: rotate(-3deg);
+	}
+	#wrap-wrap-content{
+		background-image: url('images/about/paper/edge.png');
+		background-repeat: repeat-y;
+		background-position: -10px 0%;
+	}

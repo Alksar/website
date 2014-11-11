@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8>
+  <title> Тестовая функция </title>
+  <link rel="stylesheet" href="CSS/screen_calcpage.css">
+  <!--[if lt IE 9]>
+	<script src="html5shiv/dist/html5shiv"></script>
+  <![endif]-->
+  <style>
+	body{
+		background-image: url('images/bg5.jpg');
+	}
+	#show_data{
+		-moz-border-radius: 0 0 0 0;
+		-webkit-border-radius: 0 0 0 0;
+		border-radius: 0 0 0 0;
+	}
+	input[type=button]{
+		width: 200px;
+	}
+	input[name="calc-data"]{
+		width: 233px;
+	}
+	input[name="step-back"]{
+		width: 225px;
+	}
+	input[name="x1-function-field"]{
+		width: 112px;
+	}
+	
+	<!--/* не работает вставка треугольника, оживить
+	input[type=button]:after{		
+		content: "";
+		display: block;
+		width: 10px;
+		height: 10px;
+		border-top: 25px solid transparent;
+		border-right: 50px solid red;
+		border-bottom: 25px solid transparent;
+	}-->
+  </style>
+  <script src="JS/Variant.js"></script>
+  <script src="JS/GoldenSection.js"></script>
+  <script type="text/javascript">
+	var logArray=[];
+	logArray.zoom=0;
+	var activeIndex=0, limitIndex=0;
+	var needCalculate=true;
+	var firstVariable="x1", secondVariable="x2";
+	function CalculateForm(){
+		activeIndex=0;
+		limitIndex=0;
+		firstVariable="";
+		secondVariable="";
+		if (!CheckData()){return false;}
+		
+		var formData={
+			func_x1: "",
+			func_x2: "",
+			step: "",//h
+			eps: "",
+			eps2: "0.1",
+			select: "",
+			x0: ""
+		}
+		var programData={
+			func_js: "",
+			step: 0,
+			eps: 0,
+			eps2: 0.1,
+			select: "",
+			minPoint: {
+				x: 0,
+				y: 0
+			},
+			next_minPoint: {
+				x: null,
+				y: null			
+			},	
+			direction: {
+				x: null,
+				y: null
+			}			
+		}
+		programData.Distanse=function(){
+			return (Math.sqrt(Math.pow((programData.next_minPoint.x-programData.minPoint.x),2)+Math.pow((programData.next_minPoint.y-programData.minPoint.y),2)));
+		}
+		var minPointIsFound=false;
+		var none_direction={x:null, y:null};//Направление обозначающие отсутствие направления, не выводится в функции DrawData(). Подумать как переделать.
+		
+		GetData();
+		InitializeData();	
+	   
+		
+		Selector(); //После работы функции GetDirection и MakeStep ссылаются на верные функция варианта select
+		var iterationCount=0, iterationLimit=60;
+		var goodDirection;//bool
+		do {			
+			if (!(iterationCount==0)){				
+				programData.minPoint.x=programData.next_minPoint.x;
+				programData.minPoint.y=programData.next_minPoint.y;	
+			}
+			CreateLog(logArray, activeIndex, programData.minPoint);
+			goodDirection=programData.GetDirection();
+			if (goodDirection){				
+				programData.MakeStep();
+			}
+			iterationCount++;
+			activeIndex++;
+		} while (goodDirection && (iterationCount<iterationLimit))
+		if (iterationCount<iterationLimit) minPointIsFound=true;
+		else minPointIsFound=false;
+		if (minPointIsFound) {
+			//DrawData(logArray);
+			ShowResult(programData, minPointIsFound);//Показать на странице правельный div c информацией о точке минимума (заполнить этот див правельными данными)
+		} 
+		else{
+			//DrawDataModify(logArray); //Может вообще не рисовать, или рисовать не все, модифицированный метод DrawData
+			ShowResult(programData, minPointIsFound);//Показать на странице правельный div c информацией о причине зацикливания алгоритма, возможно указать в качестве точки минимума - последнюю.
+		}
+		activeIndex--;
+		limitIndex=activeIndex;
+		needCalculate=false;
+		return true;//Выход из CalculateForm		
+	//---------------------------------------Далее объявления вложенных функций в CalculateForm-------------------------------------------------//
+	
+		//Считывает значения из формы в объект formData
+		function GetData(){	
+			formData.func_x1     = document.getElementById("x1-function-field").value;
+			formData.func_x2     = document.getElementById("x2-function-field").value;
+			formData.x0       = document.getElementById("x0-field").value;			
+			formData.step     = document.getElementById("step-field").value;
+			formData.eps      = document.getElementById("eps-field").value;
+			formData.eps2     = "0.1";
+			formData.select   = document.getElementById("metod-field").value;		
+			
+			return;
+		}
+		
+		//Заполняет объект programData данными, которые будут использоваться для расчетов. 
+		function InitializeData(){
+			
+			programData.func_js=parseFloat(formData.func_x1).toString()+"*Math.pow(x1,2)+"+parseFloat(formData.func_x2).toString()+"*Math.pow(x2,2)";
+			programData.step=parseFloat(formData.step);
+			programData.eps=parseFloat(formData.eps);
+			programData.eps2=0.1;
+			programData.select=formData.select;			
+			programData.minPoint.x=parseFloat(formData.x0);
+			programData.minPoint.y=parseFloat((formData.x0).substring((formData.x0).indexOf(";")+1));
+			programData.next_minPoint.x=null;
+			programData.next_minPoint.y=null;
+			programData.direction.x=null;
+			programData.direction.y=null;
+			
+			
+			return;
+		}
+	
+	
+	
+		/*Инициализирует свойства programData.GetDirection и programData.MakeStep функциями выбранного метода(варианта).
+		Для работы функции необходимо, чтобы к странице были подключены библиотеки содержащие реализацию Sanya, Deneir, Light, Makar*/
+		function Selector(){
+			switch (programData.select) {
+				case "Sanya":
+					programData.GetDirection=GetDirection_Sanya;
+					programData.MakeStep=MakeStep_Sanya;
+					break
+				case "Deneir":
+					programData.GetDirection=GetDirection_Deneir;
+					programData.MakeStep=MakeStep_Deneir;
+					break
+				case "Light":
+					programData.GetDirection=GetDirection_Light;
+					programData.MakeStep=MakeStep_Light;
+					break
+				case "Makar":
+					programData.GetDirection=GetDirection_Makar;
+					programData.MakeStep=MakeStep_Makar;
+			}
+		}
+	
+	}//CalculateForm
+	
+	/*Проверяет корректность введенных данных на форме, возвращает true - в случае корректных данных, false - не корректных.
+		Если поле содержит данные введенные некоректно - у соответствующего error-элемента удаляется свойство display: none;,
+		Если корректно, то error-элемент получает свойтво display: none;*/
+	function CheckData(){
+		
+		var correctData=true;
+		var checkingData;
+		
+		checkingData=document.getElementById("metod-field").value;
+		if (checkingData=="Sanya" || checkingData=="Deneir" || checkingData=="Light" || checkingData=="Makar"){
+			document.getElementById("err-metod-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-metod-field").style.display='inline';
+			correctData=false;
+		}
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=document.getElementById("x0-field").value;
+		if ((/^[\+\-]?[0-9]*\.?[0-9]*;[\+\-]?[0-9]*\.?[0-9]*$/.test(checkingData)) && !(/^;/.test(checkingData)) && !(/;$/.test(checkingData))) {
+			document.getElementById("err-x0-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-x0-field").style.display='inline';
+			correctData=false;
+		}
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=+document.getElementById("step-field").value;
+		if (!isNaN(checkingData) && checkingData>0){
+			document.getElementById("err-step-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-step-field").style.display='inline';
+			correctData=false;
+		}
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=+document.getElementById("eps-field").value;
+		if (!isNaN(checkingData) && checkingData>0){
+			document.getElementById("err-eps-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-eps-field").style.display='inline';
+			correctData=false;
+		}
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=+document.getElementById("x1-function-field").value;
+		var checkingData1=+document.getElementById("x2-function-field").value;
+		if ((!isNaN(checkingData) && checkingData!=0) && (!isNaN(checkingData1) && checkingData1!=0)){
+			document.getElementById("err-function-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-function-field").style.display='inline';
+			correctData=false;
+		}
+				
+		return correctData;
+	}//CheckData
+		
+	//Возвращает значение функции function_str в точке (x1,x2)
+	function GetFunctionValue(function_str, x1, x2){
+		var value=0, function_str_temp=function_str;
+		
+		function_str_temp=function_str_temp.replace(firstVariable,'('+x1.toString()+')');
+		function_str_temp=function_str_temp.replace(secondVariable,'('+x2.toString()+')');
+		
+		value=eval(function_str_temp);
+
+		return value;
+	}
+	
+	
+	
+	
+	//Добавляет в массив logArray запись в позицию activeIndex, содержащую информацию об очерядной точке минимума(x0) и полученном направлении(direction)
+	function CreateLog(Array, Index, x0){
+		Array[Index]={point:{x:0, y:0}};
+		
+		Array[Index].point.x=x0.x;
+		Array[Index].point.y=x0.y;		
+		return;
+	}
+	
+	//Задание начального состояния канве
+	window.onload=function(){
+		CanvasBackground();
+		
+		
+		
+		var canvas=document.getElementById('drawpage');
+		var context=canvas.getContext('2d');
+	
+		canvas.addEventListener("click", halmaOnClick, false);
+		function halmaOnClick(e) {
+			var buttonPush=getCursorPosition(e);
+			if (buttonPush==1) {
+				if (logArray.zoom>0){
+					if ((logArray.zoom>1) && ((Math.abs(logArray[logArray.zoom-1].point.x-logArray[logArray.zoom-2].point.x)<0.01) && (Math.abs(logArray[logArray.zoom-1].point.y-logArray[logArray.zoom-2].point.y)<0.01))) logArray.zoom--;
+					logArray.zoom--;
+					DrawData(logArray.zoom, activeIndex-1);
+				}
+			}
+			else if (buttonPush==2) {
+				if ((logArray.zoom>=0) && (logArray.zoom<activeIndex-2)){
+					if ((Math.abs(logArray[logArray.zoom].point.x-logArray[logArray.zoom+1].point.x)<0.01) && (Math.abs(logArray[logArray.zoom].point.y-logArray[logArray.zoom+1].point.y)<0.01)) logArray.zoom++;
+					logArray.zoom++;
+					DrawData(logArray.zoom, activeIndex-1);
+				}
+			}
+			return;		
+		}
+		function getCursorPosition(e) {
+			var x;
+			var y;
+			if (e.pageX != undefined && e.pageY != undefined) {
+				x = e.pageX;
+				y = e.pageY;
+			}
+			else {
+				x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+				y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+			}
+			x -= canvas.offsetLeft;
+			y -= canvas.offsetTop;
+			if ((x>=440 && x<=460) && (y>=5 && y<=25)) return 1;
+			else if ((x>=465 && x<=485) && (y>=5 && y<=25)) return 2;
+			return 0;
+		}		
+		return;
+	}
+	function CanvasBackground(){
+		var canvas=document.getElementById('drawpage');
+		var context=canvas.getContext('2d');
+		
+		//клетчатая сетка
+		for(var x=0.5; x<canvas.width; x+=10){
+			context.moveTo(x, 0);
+			context.lineTo(x, canvas.height);		
+		}
+		for(var y=0.5; y<canvas.height; y+=10){
+			context.moveTo(0, y);
+			context.lineTo(canvas.width, y);		
+		}
+		context.strokeStyle="#eee";
+		context.stroke();
+		
+		return;
+	}//CanvasBackground
+	
+	
+	//Изображает данные массива logArray на холсте canvas
+	function DrawData(a,b){
+		
+		var canvas=document.getElementById('drawpage');
+		var context=canvas.getContext('2d');
+		var widthCanvas=canvas.width, heightCanvas=canvas.height;
+		
+		
+		canvas.width=canvas.width;
+		
+		
+		
+		CanvasBackground();
+		CanvasAxis();
+	
+		
+		var widthChart=0, heightChart=0, originChart={x:0,y:0};
+		var step=0, offsetWidth=50, offsetHeight=40;
+		AnalysisChart();
+		stepY=(canvas.height-offsetHeight-10)/heightChart;
+		stepX=(canvas.width-offsetWidth-10)/widthChart;
+		if (heightChart==0 && widthChart==0){
+			stepY=1;
+			stepX=1;
+			offsetWidth-=10;
+			offsetHeight-=10;
+		}
+		
+		context.textBaseline = "top";
+		context.font="bold 9px sans-serif";
+		context.fillText("("+(originChart.x-1/stepX*10).toFixed(3).toString()+";"+(originChart.y-1/stepY*10).toFixed(3).toString()+")",2,5);	
+		
+		context.beginPath();
+		context.fillStyle="red";
+		
+		var i=0;//i=a ***************************************************************************************************************************
+		context.fillRect((logArray[i].point.x-originChart.x)*stepX+offsetWidth,(logArray[i].point.y-originChart.y)*stepY+offsetHeight,6,6);
+		context.fillText("(x0)",(logArray[i].point.x-originChart.x)*stepX+offsetWidth-2,(logArray[i].point.y-originChart.y)*stepY+offsetHeight-10);	
+		context.moveTo((logArray[i].point.x-originChart.x)*stepX+offsetWidth+3, (logArray[i].point.y-originChart.y)*stepY+offsetHeight+3);
+		i++;
+		
+		context.lineWidth = 1;
+		context.strokeStyle = "rgb(100,100,100)";
+				
+		for (i; i<=b; i++){
+			if ((i!=b) && (Math.abs(logArray[i].point.x-logArray[i+1].point.x)<0.1) && (Math.abs(logArray[i].point.y-logArray[i+1].point.y)<0.01)) continue;
+			context.lineTo((logArray[i].point.x-originChart.x)*stepX+offsetWidth, (logArray[i].point.y-originChart.y)*stepY+offsetHeight);
+			context.fillRect((logArray[i].point.x-originChart.x)*stepX+offsetWidth-3,(logArray[i].point.y-originChart.y)*stepY+offsetHeight-3,6,6);
+		}
+		context.fillText("*",(logArray[b].point.x-originChart.x)*stepX+offsetWidth+3,(logArray[b].point.y-originChart.y)*stepY+offsetHeight-6);
+		context.stroke();
+		
+		//вывод засечек точки минимума на осях и значений координат
+		context.beginPath();
+		context.moveTo((logArray[b].point.x-originChart.x)*stepX+offsetWidth,offsetHeight-15);		
+		context.lineTo((logArray[b].point.x-originChart.x)*stepX+offsetWidth,offsetHeight-5);
+		context.fillText(logArray[b].point.x.toFixed(2).toString(),(logArray[b].point.x-originChart.x)*stepX+offsetWidth-10,offsetHeight-10-15);
+		
+		context.moveTo(offsetWidth-15,(logArray[b].point.y-originChart.y)*stepY+offsetHeight);
+		context.lineTo(offsetWidth-5,(logArray[b].point.y-originChart.y)*stepY+offsetHeight);
+		context.fillText(logArray[b].point.y.toFixed(2).toString(),offsetWidth-10-25,(logArray[b].point.y-originChart.y)*stepY+offsetHeight-3);			
+		
+		context.lineWidth = 1;
+		context.strokeStyle = "green";
+		context.stroke();
+		
+		/*context.beginPath();
+		context.lineWidth = 7;
+		context.moveTo(-200, -200);
+		context.lineTo(200, 200);
+		context.stroke();*/
+		
+		
+		return;
+		//----------------------------------------------
+		//на основе точек logArray (от a до b) заполняет переменные widthChart-расстояние от самой левой до самой правой точки, heightChart-верх-низ, origin - начало координат вывода, т.е. левый нижний угол
+		function AnalysisChart(){
+			originChart.x=logArray[a].point.x;
+			originChart.y=logArray[a].point.y;
+			
+			var minLeft=logArray[a].point.x, maxRight=logArray[a].point.x, minBottom=logArray[a].point.y, maxTop=logArray[a].point.y;
+			
+			for (var i=a+1; i<=b; i++){
+				if (logArray[i].point.x<minLeft) minLeft=logArray[i].point.x;
+				if (logArray[i].point.x>maxRight) maxRight=logArray[i].point.x;
+				if (logArray[i].point.y<minBottom) minBottom=logArray[i].point.y;
+				if (logArray[i].point.y>maxTop) maxTop=logArray[i].point.y;		
+			}
+			
+			widthChart=maxRight-minLeft;
+			heightChart=maxTop-minBottom;
+			
+			originChart.x=minLeft;
+			originChart.y=minBottom;
+			
+			return;		
+		}
+		//----------------------------		
+		//Выводит оси координат на канву
+		function CanvasAxis(){
+			
+			var canvas=document.getElementById('drawpage');
+			var context=canvas.getContext('2d');
+			
+			context.strokeStyle="#000";
+			//горизонтальная стрелка
+			context.beginPath();
+			context.moveTo(0,30);
+			context.lineTo(240,30);
+			context.moveTo(260,30);
+			context.lineTo(498,30);
+			context.moveTo(493,25);
+			context.lineTo(498,30);
+			context.lineTo(493,35);
+		
+			//вертикальная стрелка
+			context.moveTo(40,0);
+			context.lineTo(40,120);
+			context.moveTo(40,140);
+			context.lineTo(40,300);
+			context.moveTo(45,295);
+			context.lineTo(40,300);
+			context.lineTo(35,295);		
+		
+			
+			context.stroke();
+		
+			context.font="bold 12px sans-serif";
+			context.fillText("I", 249, 33);
+			context.fillText("II", 37, 134);
+			
+			//Кнопки массштаба
+			context.beginPath();
+			context.lineWidth=4;
+			context.fillStyle="rgb(10,100,164)"; //Цвет заливки
+			context.strokeStyle="white"; //Цвет самой линии
+			context.fillRect(440,5,20,20);
+			context.moveTo(443, 15);
+			context.lineTo(457, 15);
+			
+			context.fillRect(465,5,20,20);
+			context.moveTo(468, 15);
+			context.lineTo(482, 15);
+			context.moveTo(475, 8);
+			context.lineTo(475, 22);
+			
+			context.stroke();
+			context.closePath();
+			
+		
+			return;
+		}//CanvasAxis
+		return;
+	}//DrawData
+	
+	/*Отображает на странице блок div#show_result. Если positiveOrNegative = true : Выводит точку минимума и значение функции в этой точке
+	----------------------------------------------------positiveOrNegative = false : Выводит информацию "из-за чего это случилось", а также последнюю из найденных точек минимума и значение функции в этой точке*/
+	function ShowResult(programData, positiveOrNegative){
+		//устанавливаем верные значения результата
+		document.getElementById("Show-first-cord").value=Math.round(programData.minPoint.x*100)/100;		
+		document.getElementById("Show-second-cord").value=Math.round(programData.minPoint.y*100)/100;
+		document.getElementById("Show-func-value").value=Math.round(GetFunctionValue(programData.func_js, programData.minPoint.x, programData.minPoint.y)*100)/100;
+		
+		if (positiveOrNegative==true){
+			//отображаем
+			document.getElementById("show_result").style.display = 'block';
+			document.getElementById("show_result_negative").style.display = 'none';
+			document.getElementById("show_result_positive").style.display = 'inline';
+			//#show_result 			display: block;
+			//#show_result_negative display: none;
+			//#show_result_positive display: inline;
+		}
+		else{
+			//отображаем
+			document.getElementById("show_result").style.display = 'block';
+			document.getElementById("show_result_positive").style.display = 'none';
+			document.getElementById("show_result_negative").style.display = 'inline';			
+			//#show_result 			display: block;
+			//#show_result_positive display: none;
+			//#show_result_negative display: inline;		
+		}		
+	}
+	function ClearScreen(){
+		//стереть канвас
+		document.getElementById("show_result").style.display = 'none';
+		logArray=[];
+		logArray.zoom=0;
+		activeIndex=0;
+		return;
+	}
+	
+	function MainCalculate(){
+		CalculateForm();
+	}
+	
+	function NextCalc(){
+		if (needCalculate) {
+			if (CalculateForm()){
+				activeIndex=0; 
+				DrawData(logArray.zoom,activeIndex);
+			}
+		}
+		else if (activeIndex<limitIndex) {
+			activeIndex++; 
+			DrawData(logArray.zoom, activeIndex);
+		}
+		return;
+	}
+	function PrevCalc(){
+		if (needCalculate) {return false;}
+		else if (activeIndex>0) {activeIndex--; DrawData(logArray.zoom, activeIndex);}
+		return true;			
+	}
+  </script>
+</head>
+
+<body>
+<div id="wrap">
+
+<header class="group">
+<nav>
+  <ul id="main-nav">
+    <li><a href="main.html">главная</a></li>
+	<li><a href="level_lines.html">линии уровня</a></li>
+	<li class="active"><a href="test_page.html">тестовая функция</a></li>
+	<li><a href="search_min.html">поиск минимума</a></li>
+	<li><a href="about.html">о нас</a></li>
+  </ul>
+</nav>
+</header>
+<div id="wrap-content">
+<div class="group">
+
+<div id="entry">
+	<p>Здесь вы можете по шагам отследить нахождение точки минимума функции вида y=ax1<sup>2</sup>+bx2<sup>2</sup></p>
+</div>
+<div id="input_data">
+ <form method="post" action="handler.php">
+   <table>
+	<tr>
+		<td width="149" align="left"><label for="metod-field"><span class="tooltip">метод<span class="help_message">Метод поиска минимума, выберите один из предлагаемых.</span></span></label></td>
+		<td colspan="3">
+			<select id="metod-field" name="metod-field">
+				<option selected="selected" disabled="disabled">Выберите метод</option>
+				<option value="Sanya">Случайного поиска(лучшее из 40 направлений, поиск минимума в направлении)</option>
+				<option value="Deneir">Случайного поиска(лучшее направление из 40, поиск с постоянным шагом)</option>
+				<option value="Light">Случайного поиска(до первого допустимого направления)</option>
+				<option value="Makar">Метод сопряженных направлений</option>
+			</select>
+		</td>
+		<td width="150"> <span class="error_message" id="err-metod-field">Метод не выбран </span> </td>
+	</tr> 
+	<tr>
+		<td align="left"><label for="x1-function-field"><span class="tooltip">функция y=<span class="help_message">Функция двух переменных. Допустимые операции: +,-,*,/,(),||,^, где: <ul> <li>^ - степень, x^2</li><li>|| - модуль, |x|</li> </ul></span></span></label></td>
+		<td colspan="3"> <input type="text" name="x1-function-field" id="x1-function-field" placeholder="1" style="text-align:right">&#8226x1<sup>2</sup>&nbsp+&nbsp <input type="text" name="x2-function-field" id="x2-function-field" placeholder="1" style="text-align:right">&#8226x2<sup>2</sup></td>
+		<td width="150"> <span class="error_message" id="err-function-field">Неверный формат функции</span> </td>
+	</tr> 
+	<tr> 
+     <td align="right"><label for="x0-field"><span class="tooltip">x<sub>0&nbsp</sub><span class="help_message">Начальная точка. Должна быть введена в формате: first;second</span></span></label></td>
+     <td width="100"><input type="text" name="x0-field" id="x0-field" placeholder="0;0"></td>	 
+	 <td width="150"> <span class="error_message" id="err-x0-field">Неверный формат x<sub>0</sub> </span>  </td>
+	</tr>
+	<tr> 
+     <td> </td>
+	 <td align="right"><label for="step-field"><span class="tooltip">шаг&nbsp<span class="help_message">Шаг поиска. Положительное число.</span></span></label></td>
+	 <td><input type="text" name="step-field" id="step-field" placeholder="10"></td>
+	 <td width="150"><span class="error_message" id="err-step-field">Ожидается положительное число</span></td>
+	</tr>
+	<tr> 
+     <td> </td>
+     <td> </td>
+	 <td align="right"><label for="eps-field"><span class="tooltip">точность&nbsp<span class="help_message">Точнось поиска. Чем меньше - тем точнее поиск. Положительное число.</span></span></label></td>
+	 <td><input type="text" name="eps-field" id="eps-field" placeholder="0.01"></td>
+	 <td width="150"> <span class="error_message" id="err-eps-field">Ожидается положительное число</span> </td>
+	</tr>
+	<tr> 
+     <td colspan="2"><input type="reset" value="сброс" name="reset-data" id="reset-data" onClick="ClearScreen();"></td>
+     <td colspan="2"><input type="button" value="построить" name="calc-data" id="calc-data" onClick="if(CalculateForm()) DrawData(0,limitIndex);"></td>
+     <td width="150"> </td>
+   </tr> 
+	<tr> 
+     <td colspan="2" align="right"><input type="button" value="шаг назад" name="step-back" id="step-back" onClick="PrevCalc();"></td>
+     <td colspan="2"><input type="button" value="шаг вперед" name="step-forward" id="step-forward" onClick="NextCalc();"></td>
+     <td width="150"> </td>
+	</tr>
+   </table>
+ </form>
+</div>
+
+<div id="show_data">
+ <div id="canvas">
+	<canvas id="drawpage" width="498px" height="300px"></canvas>
+  </div>
+</div>
+
+</div>
+
+<div id="show_result">
+	<span id="show_result_positive">Искомая точка минимума:</span> <span id="show_result_negative">К сожалению точность поиска не выполненна, пожалуйста, воспользуйтесь другим методом минимизации. Последняя найденная точка минимума: </span> (<input type="text" name="Show-first-cord" id="Show-first-cord" disabled="disabled"/>;<input type="text" name="Show-second-cord" id="Show-second-cord" disabled="disabled"/>). Значение функции в этой точке: y=<input type="text" name="Show-func-value" id="Show-func-value" disabled="disabled"/>;
+</div>
+</div> <!-- wrap -->
+<footer>
+ <ul id="footer-nav">
+		<li><a href="main.html">главная</a></li>
+		<li><a href="about.html">контакты</a></li>
+		<li><a href="about.html">о нас</a></li>
+</ul>
+ Все права защищены и охраняются законом. Copyright © ООО "Крутые парни" 2013+
+</footer>
+
+</div> <!-- wrap-main -->
+
+</body>
+</html>

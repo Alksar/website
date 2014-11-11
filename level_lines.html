@@ -1,0 +1,1138 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=utf-8>
+  <title> Линии уровня </title>
+  <link rel="stylesheet" href="CSS/screen_calcpage.css">
+  <style>
+	body{
+		background-image: url('images/bg5.jpg');
+	}
+	table{
+		margin-left: 75px;
+	}
+	td:first-child{
+		line-height: 0.35;
+	}
+
+  </style>
+  <!--[if lt IE 9]>
+	<script src="html5shiv/dist/html5shiv"></script>
+  <![endif]-->
+  <script src="JS/GoldenSection.js"></script>
+  <script type="text/javascript">
+	var logArray=[];
+	logArray.zoom=0;
+	logArray.zoomDirection=0;
+	var colorArray=[];
+  
+  window.onload=function(){
+		CanvasBackground();
+  
+		var canvas=document.getElementById('drawpage');
+		var context=canvas.getContext('2d');
+	
+		canvas.addEventListener("click", halmaOnClick, false);
+		function halmaOnClick(e) {
+			var buttonPush=getCursorPosition(e)
+			if (buttonPush==1) {
+				if (logArray.zoomDirection==1){
+					if (logArray.zoom>0) {
+						logArray.zoom--;
+						DrawData();
+					}
+				}
+				else if (logArray.zoomDirection==-1){
+					if (logArray.zoom<logArray.length-1) {
+						logArray.zoom++;
+						DrawData();
+					}
+				}
+			}
+			else if (buttonPush==2) {
+				if (logArray.zoomDirection==1){
+					if (logArray.zoom<logArray.length-1) {
+						logArray.zoom++;
+						DrawData();
+					}
+				}
+				else if (logArray.zoomDirection==-1){
+					if (logArray.zoom>0) {
+						logArray.zoom--;
+						DrawData();
+					}
+				}
+			}
+			return;			
+		}
+		function getCursorPosition(e) {
+			var x;
+			var y;
+			if (e.pageX != undefined && e.pageY != undefined) {
+				x = e.pageX;
+				y = e.pageY;
+			}
+			else {
+				x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+				y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+			}
+			x -= canvas.offsetLeft;
+			y -= canvas.offsetTop;
+			if ((x>=440 && x<=460) && (y>=5 && y<=25)) return 1;
+			else if ((x>=465 && x<=485) && (y>=5 && y<=25)) return 2;
+			return 0;
+		}		
+		return;
+	}//onload
+	
+	function CanvasBackground(){
+		var canvas1=document.getElementById('drawpage');
+		var context1=canvas1.getContext('2d');
+		
+		//клетчатая сетка
+		for(var x=0.5; x<canvas1.width; x+=10){
+			context1.moveTo(x, 0);
+			context1.lineTo(x, canvas1.height);		
+		}
+		for(var y=0.5; y<canvas1.height; y+=10){
+			context1.moveTo(0, y);
+			context1.lineTo(canvas1.width, y);		
+		}
+		context1.strokeStyle="#eee";
+		context1.stroke();
+		
+		return;
+	}
+	//----------------------------------
+	
+  
+  
+  
+  
+  
+	var firstVariable="", secondVariable="";
+	function CalculateForm(){
+		firstVariable="";//?
+		secondVariable="";//?
+		if (!CheckData()){return false;}
+		
+		
+		var formData={
+			func: "",//str_func
+			intervalX1:"",
+			dx1:"",
+			intervalX2:"",
+			dx2:"",
+			intervalC:"",
+			dC:"",
+			eps:""			
+		}
+		var programData={
+			func_js: "",
+			intervalX1: {
+				start: 0,
+				finish: 0
+			},
+			dx1:0,
+			intervalX2: {
+				start: 0,
+				finish: 0
+			},
+			dx2:0,
+			intervalC: {
+				start: 0,
+				finish: 0
+			},
+			dC:0,
+			eps:0
+		}
+		
+		GetData();
+		InitializeData();
+		
+		//console.log(formData.func+' '+formData.intervalX1+' '+formData.intervalX2+formData.intervalC+' '+formData.dx1+' '+formData.dx2+' '+' '+formData.dC+' '+formData.eps);
+		//console.log(programData.func_js+' '+programData.intervalX1.start+' '+programData.intervalX1.finish+' '+programData.intervalX2.start+' '+programData.intervalX2.finish+' '+programData.intervalC.start+' '+programData.intervalC.finish+' '+programData.dx1+' '+programData.dx2+' '+programData.dC+' '+programData.eps);
+		//return;
+		var canvas=document.getElementById('drawpage');
+		var context=canvas.getContext('2d');
+		/*var origin={
+				x: canvas.width/2,
+				y: canvas.height/2
+			}
+		
+		CanvasAxis(origin);	
+		*/
+		
+		logArray=[];
+		logArray.zoom=0;
+		logArray.zoomDirection=0;
+		colorArray=[];
+		var numberOfLevelLine=0, numberOfElInLevelLine=0;
+		
+		var needDrawing=true;
+		var funcReversed=false;
+		for(var indexC=programData.intervalC.start; indexC<=programData.intervalC.finish; indexC=indexC+programData.dC){
+			numberOfElInLevelLine=0;
+			logArray[numberOfLevelLine]=[];
+			numberOfLevelLine++;
+			console.log('C :'+indexC);
+			var supFunc=GetSupFunc(programData.func_js, indexC);
+			console.log(supFunc);
+			//context.beginPath();
+			//var color='rgb('+Math.floor(Math.random() * 256).toString()+','+Math.floor(Math.random() * 256).toString()+','+Math.floor(Math.random() * 256).toString()+')';
+			//context.fillStyle=color;
+			//console.log(color);
+			for (var indexX1=programData.intervalX1.start; indexX1<=programData.intervalX1.finish; indexX1=indexX1+programData.dx1){
+				console.log('x1 :'+indexX1);
+				var direct={
+						x:0,
+						y:1
+					}
+				var minPoint={
+						x:0,
+						y:0
+					}
+				var leftLocal={x:0, y:0}, rightLocal={x:0, y:0};
+				var delta=0;
+				var stepLocal=programData.dx2;
+				
+				delta=GetFunctionValue(supFunc, indexX1+stepLocal*direct.x, programData.intervalX2.start+stepLocal*direct.y)-GetFunctionValue(supFunc, indexX1, programData.intervalX2.start);
+				if (delta>0) {
+					console.log('смена знака направления');
+					direct.y*=-1;
+					delta=GetFunctionValue(supFunc, indexX1+stepLocal*direct.x, programData.intervalX2.start+stepLocal*direct.y)-GetFunctionValue(supFunc, indexX1, programData.intervalX2.start);
+				}	
+				console.log('delta: '+delta);
+				console.log('direct: '+direct.x+';'+direct.y);
+				var indexX2=programData.intervalX2.start, count=0;
+				var stopWhile=false;
+				//for(var indexX2=programData.intervalX2.start; indexX2<=programData.intervalX2.finish; indexX2=indexX2+programData.dx2){
+				while ((indexX2<=programData.intervalX2.finish) && (indexX2>=programData.intervalX2.start) && !stopWhile) {
+					console.log('x2 :'+indexX2);
+					//alert('count: '+count+' indexX2: '+indexX2);
+					leftLocal={
+						x:minPoint.x,
+						y:minPoint.y
+					}				
+					rightLocal={
+						x:minPoint.x,
+						y:minPoint.y
+					}
+					if (indexX2==programData.intervalX2.start){
+						leftLocal={
+							x:indexX1,
+							y:indexX2
+						}				
+						rightLocal={
+							x:indexX1,
+							y:indexX2
+						}
+					}
+					
+					var iteration=0, limit=600;
+					//console.log()					
+					delta=GetFunctionValue(supFunc, rightLocal.x+stepLocal*direct.x, rightLocal.y+stepLocal*direct.y)-GetFunctionValue(supFunc, rightLocal.x, rightLocal.y);
+					console.log('Перед входом в ввайл'+' delta= '+delta+' direct= '+direct.x+';'+direct.y+' supFunc= '+supFunc);
+					//while ((delta<0) && (iteration<limit)){
+					while ((delta<0) && (rightLocal.y<=programData.intervalX2.finish) && (rightLocal.y>=programData.intervalX2.start)){
+						console.log('delta :'+delta+' я бесконечный while'+' rightLocal: '+rightLocal.x+';'+rightLocal.y);
+						if (iteration>0) {
+							leftLocal.x+=stepLocal*direct.x;
+							leftLocal.y+=stepLocal*direct.y;
+						}
+						rightLocal.x=rightLocal.x+stepLocal*direct.x;
+						rightLocal.y=rightLocal.y+stepLocal*direct.y;
+						delta=GetFunctionValue(supFunc, rightLocal.x+stepLocal*direct.x, rightLocal.y+stepLocal*direct.y)-GetFunctionValue(supFunc, rightLocal.x, rightLocal.y);
+						iteration++;				
+					}
+					
+					if (delta<0) stopWhile=true;
+					console.log('Продолжаем? '+(!stopWhile)+' delta '+delta);
+					if (!stopWhile){
+						rightLocal.x=rightLocal.x+stepLocal*direct.x;
+						rightLocal.y=rightLocal.y+stepLocal*direct.y;
+					
+						console.log('leftLocal: '+leftLocal.x+';'+leftLocal.y+' rightLocal: '+rightLocal.x+';'+rightLocal.y);
+						minPoint=GoldenSection(supFunc, leftLocal, rightLocal, programData.eps);
+						console.log('leftLocal: '+leftLocal.x+';'+leftLocal.y+' rightLocal: '+rightLocal.x+';'+rightLocal.y);
+						console.log('minPoint: '+minPoint.x+';'+minPoint.y+' '+needDrawing);
+						indexX2=minPoint.y;
+						count++;
+						//if (count==10) zaciklilcya=true;
+						console.log('indexX2 '+indexX2);
+						
+						if (needDrawing) {
+							if (isLineLevelPoint(minPoint, programData.func_js, indexC)){
+								console.log('Рисуем точку: '+minPoint.x+';'+minPoint.y);
+								logArray[numberOfLevelLine-1][numberOfElInLevelLine]={x:0,y:0};
+								logArray[numberOfLevelLine-1][numberOfElInLevelLine].x=minPoint.x;
+								logArray[numberOfLevelLine-1][numberOfElInLevelLine].y=minPoint.y;
+								numberOfElInLevelLine++;
+								//DrawPoint(minPoint);
+							}	else console.log('Не рисуем точку: '+minPoint.x+';'+minPoint.y+' value= '+(GetFunctionValue(programData.func_js, minPoint.x,minPoint.y)-indexC).toString());
+						}
+						needDrawing=!needDrawing;
+						supFunc=ReverseSignFunc(supFunc);
+						funcReversed=!funcReversed;
+						console.log('ReverseSighFunc: '+supFunc);
+					}
+					else {
+						if (funcReversed) {supFunc=ReverseSignFunc(supFunc); funcReversed=!funcReversed;}
+						needDrawing=true;
+					}
+				}				
+			}		
+			//context.stroke();			
+		}
+		
+		
+		var result = [], j=0;
+		for (var i = 0; i < logArray.length; i++) {
+			if (logArray[i][0]!=undefined) {
+				result[j]=[];
+				for (var k=0; k<logArray[i].length; k++){
+					result[j][k]={x:0,y:0};
+					result[j][k].x=logArray[i][k].x;
+					result[j][k].y=logArray[i][k].y;
+				}
+				j++;
+			}
+		}
+		logArray=result;
+		logArray.zoom=0;
+		logArray.zoomDirection=0;
+		//alert(logArray[0][0].x+';'+logArray[0][0].y);
+		if ((logArray[0]==undefined) || (logArray[0][0]==undefined)) {
+			canvas.width=canvas.width;
+			CanvasBackground();
+			context.font="bold 16px sans-serif";
+			context.fillStyle='red';
+			context.fillText('Линии уровня не найденны при заданных параметрах.',canvas.width/2-220,canvas.height/2-30);
+			context.fillStyle='black';
+			context.fillText('Попробуйте изменить интервалы x1 и x2,',canvas.width/2-200,canvas.height/2); 
+			context.fillText('или уменьшить шаги поиска dx1 или dx2.',canvas.width/2-180,canvas.height/2+30); 
+			return;
+		}
+		
+		CalcZoom();
+		DrawData();
+				
+		return true;//Выход из CalculateForm		
+	//---------------------------------------Далее объявления вложенных функций в CalculateForm-------------------------------------------------//
+		//Считывает значения из формы в объект formData
+		function GetData(){	
+			formData.func     	= document.getElementById("function-field").value;
+			formData.intervalX1 = document.getElementById("x1-field").value;
+			formData.dx1 		= document.getElementById("dx1-field").value;
+			formData.intervalX2	= document.getElementById("x2-field").value;
+			formData.dx2 		= document.getElementById("dx2-field").value;
+			formData.intervalC  = document.getElementById("C-field").value;
+			formData.dC 		= document.getElementById("dC-field").value;
+			formData.eps   		= document.getElementById("eps-field").value;
+			
+			return;
+		}
+	
+		//Заполняет объект programData данными, которые будут использоваться для расчетов.
+		function InitializeData(){
+			
+			programData.func_js=TransformStrInMathStr(formData.func);
+			programData.intervalX1.start=parseFloat(formData.intervalX1);
+			programData.intervalX1.finish= formData.intervalX1[formData.intervalX1.lastIndexOf('-')-1]=='-' ? formData.intervalX1.substring(formData.intervalX1.lastIndexOf('-')) : formData.intervalX1.substring(formData.intervalX1.lastIndexOf('-')+1);
+			programData.dx1=parseFloat(formData.dx1);
+			
+			programData.intervalX2.start=parseFloat(formData.intervalX2);
+			programData.intervalX2.finish= formData.intervalX2[formData.intervalX2.lastIndexOf('-')-1]=='-' ? formData.intervalX2.substring(formData.intervalX2.lastIndexOf('-')) : formData.intervalX2.substring(formData.intervalX2.lastIndexOf('-')+1);
+			programData.dx2=parseFloat(formData.dx2);
+			
+			programData.intervalC.start=parseFloat(formData.intervalC);
+			programData.intervalC.finish= formData.intervalC[formData.intervalC.lastIndexOf('-')-1]=='-' ? formData.intervalC.substring(formData.intervalC.lastIndexOf('-')) : formData.intervalC.substring(formData.intervalC.lastIndexOf('-')+1);
+			programData.dC=parseFloat(formData.dC);
+			
+			programData.eps=parseFloat(formData.eps);
+			
+			return;
+		}//InitializeData
+		
+		//возвращает строку, содержащую измененную функцию для метода построения точек линии уровня
+		function GetSupFunc(str_func, C){
+			//var supfunction=str_func+'-'+C.toString();
+			var supfunction=C>0 ? str_func+'-'+C.toString() : str_func+'+'+Math.abs(C).toString();
+			supfunction='Math.pow('+supfunction+',2)';
+			
+			return supfunction;
+		}
+		
+		//меняет знак переданной функции на противоположный
+		function ReverseSignFunc(str_func){
+			var res_func="";
+			if (str_func[0]=='-' && str_func[1]=='(' && str_func[str_func.length-1]==')')
+				for (var i=2; i<str_func.length-1; i++)
+					res_func=res_func+str_func[i];
+			else res_func="-("+str_func+")";
+			return res_func;
+		}
+
+		
+		//Возвращает true если точка point является точкой линии уровня C функции str_func 
+		function isLineLevelPoint(point, str_func, C){
+			return ((GetFunctionValue(str_func, point.x, point.y)-C)<0.01);
+		}
+		
+	}//CalculateForm
+	
+	/*Проверяет корректность введенных данных на форме, возвращает true - в случае корректных данных, false - не корректных.
+		Если поле содержит данные введенные некоректно - у соответствующего error-элемента удаляется свойство display: none;,
+		Если корректно, то error-элемент получает свойтво display: none;*/
+	function CheckData(){
+		
+		var correctData=true;
+		var checkingData;
+		
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=document.getElementById("x1-field").value;
+		if (/^\-?[0-9]*\.?[0-9]*\-\-?[0-9]*\.?[0-9]*$/.test(checkingData) && !(/\-$/.test(checkingData)) && (checkingData[0]=='-' ? checkingData.lastIndexOf('-')!=0 : true)){
+			document.getElementById("err-x1-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-x1-field").style.display='inline';
+			correctData=false;
+		}
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=document.getElementById("x2-field").value;
+		if (/^\-?[0-9]*\.?[0-9]*\-\-?[0-9]*\.?[0-9]*$/.test(checkingData) && !(/\-$/.test(checkingData)) && (checkingData[0]=='-' ? checkingData.lastIndexOf('-')!=0 : true)){
+			document.getElementById("err-x2-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-x2-field").style.display='inline';
+			correctData=false;
+		}
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=document.getElementById("C-field").value;
+		if (/^\-?[0-9]*\.?[0-9]*\-\-?[0-9]*\.?[0-9]*$/.test(checkingData) && !(/\-$/.test(checkingData)) && (checkingData[0]=='-' ? checkingData.lastIndexOf('-')!=0 : true)){
+			document.getElementById("err-С-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-С-field").style.display='inline';
+			correctData=false;
+		}
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=+document.getElementById("dx1-field").value;
+		if (!isNaN(checkingData) && (checkingData>0 || checkingData<0)){
+			document.getElementById("err-dx1-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-dx1-field").style.display='inline';
+			correctData=false;
+		}
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=+document.getElementById("dx2-field").value;
+		if (!isNaN(checkingData) && (checkingData>0 || checkingData<0)){
+			document.getElementById("err-dx2-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-dx2-field").style.display='inline';
+			correctData=false;
+		}
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=+document.getElementById("dC-field").value;
+		if (!isNaN(checkingData) && (checkingData>0 || checkingData<0)){
+			document.getElementById("err-dC-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-dC-field").style.display='inline';
+			correctData=false;
+		}
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=+document.getElementById("eps-field").value;
+		if (!isNaN(checkingData) && checkingData>0){
+			document.getElementById("err-eps-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-eps-field").style.display='inline';
+			correctData=false;
+		}
+		//------------------------------------------------------------------------------------------------------------
+		checkingData=document.getElementById("function-field").value;
+		if (isFunction(checkingData)){
+			document.getElementById("err-function-field").style.display='none';
+		}
+		else{
+			document.getElementById("err-function-field").style.display='inline';
+			correctData=false;
+		}
+				
+		return correctData;
+		
+		//------------------------------------------------------------------------------------------------------------
+		function isFunction(str_func){
+			var result=true, str_temp="", e;
+			var startSearchVariable=false, countDiffVariable=0;
+			var variable="", arrayVariable=[], countVariable=0, concurrency=false;
+			var countAbs=0;
+			var i=0;
+			while ((i<str_func.length) && ((SymbolInFuncAlphavit(str_func[i])))){
+				if (str_func[i]=='|') countAbs++;
+				
+				if ((!startSearchVariable) && ((str_func[i]>='a' && str_func[i]<='z') || (str_func[i]>='A' && str_func[i]<='Z'))){
+					startSearchVariable=true;
+				}
+				if (startSearchVariable){
+					if ((str_func[i]>='a' && str_func[i]<='z') || (str_func[i]>='A' && str_func[i]<='Z') || (str_func[i]>='0' && str_func[i]<='9')){//если буква или цифра, то начать считывание слова
+						variable=variable+str_func[i];
+					}
+					if (!((str_func[i]>='a' && str_func[i]<='z') || (str_func[i]>='A' && str_func[i]<='Z') || (str_func[i]>='0' && str_func[i]<='9'))){//Если str_func[i] не буква и не цифра
+						
+						//если variable новое слово, то добавить его в массив слов, увеличить countVariable.
+						for (var j=0; j<countVariable; j++){
+							if (arrayVariable[j]==variable) concurrency=true;
+						}
+						if (!concurrency) {
+							arrayVariable[countVariable]=variable;
+							countVariable++;
+							countDiffVariable++;
+						}						
+						startSearchVariable=false;
+						variable="";
+						concurrency=false;
+					}
+				}
+				
+				i++;
+			}
+			if ((i!=str_func.length) || (countAbs%2!=0))  return false;
+			if (startSearchVariable) {
+				for (var j=0; j<countVariable; j++){
+					if (arrayVariable[j]==variable) concurrency=true;
+				}
+				if (!concurrency) {
+					arrayVariable[countVariable]=variable;
+					countVariable++;
+				}
+				startSearchVariable=false;
+				variable="";
+				concurrency=false;
+			
+			}
+			if (countVariable!=2) return false; //функция не от двух переменных
+			firstVariable=arrayVariable[0];
+			secondVariable=arrayVariable[1];
+		//alert('была строка: '+str_func);
+			str_temp=str_func.replace(/[a-zA-Z]+([0-9]*[a-zA-Z]*)*/g, '1');//все переменные заменяем значением '1'
+		//alert('заменили переменные на 1: '+str_temp);
+			str_temp=str_temp.replace(/\s/g, '');
+		//alert('удалили пробелы: '+str_temp);
+			str_temp=str_temp.replace(/\^/g, '*');//операцию возведения в степень заменяем умножением
+		//alert('заменили степень - умножением: '+str_temp);
+		
+
+			if (countAbs>0){
+				str_temp=ReplaceModulesOnBrackets(str_temp,'(',')');
+				if (str_temp==false) {return false;} //неоднозначная постановка модулей
+			}
+
+			//вставляем знак '*' в нужные места
+			str_temp=str_temp.replace(/\](?=[a-zA-Z0-9\(\[])/g, ']*');
+			str_temp=str_temp.replace(/\)(?=[a-zA-Z0-9\(\[])/g, ')*');
+			str_temp=str_temp.replace(/([a-zA-Z])(?=[\(\[])/g, '$1*');
+			str_temp=str_temp.replace(/([0-9])(?=[a-zA-Z\(\[])/g, '$1*');
+			
+			
+			//Если евал вычислится без ошибки, то функция написанна корректно
+			try{
+				eval(str_temp);
+			} catch(e) {
+				result=false;
+			}
+			return result;
+			
+			//---------------------------------------------------------------------------------------------------------
+			//Если символ symbol пренадлежит множеству символов допустимых при написании функции - true, иначе - false
+			function SymbolInFuncAlphavit(symbol){
+				var result=false;
+				if ((((symbol>='a') && (symbol<='z')) || ((symbol>='A') && (symbol<='Z')) || ((symbol>='0') && (symbol<='9')) || (symbol=='+') || (symbol=='-') || (symbol=='*') || (symbol=='/') || (symbol=='^') || (symbol=='(') || (symbol==')') || (symbol=='|') || (symbol=='.') || (symbol==' '))){
+					result=true;
+				}
+				return result;
+			}
+			
+			
+		}
+	}//CheckData
+	
+	
+	
+	/*str-строка содержащая запись математической функции. 
+		TransformStrInMathStr(str) - возвращает строку содержащую запись математической функции по правилам JavaScript*/
+	function TransformStrInMathStr(str){
+		var str_res=str;
+		str_res=str_res.replace(/\s/g, '');//пробелы удалены
+		str_res=ReplaceModulesOnBrackets(str_res,'[',']');//теперь открывающие и закрывающие модули имеют вид: [,]
+	
+		
+		//вставляем знак '*' в нужные места
+		str_res=str_res.replace(/\](?=[a-zA-Z0-9\(\[])/g, ']*');
+		str_res=str_res.replace(/\)(?=[a-zA-Z0-9\(\[])/g, ')*');
+		str_res=str_res.replace(/([a-zA-Z])(?=[\(\[])/g, '$1*');
+		str_res=str_res.replace(/([0-9])(?=[a-zA-Z\(\[])/g, '$1*');
+	
+		//Заменить a^b на Math.pow(a,b)
+		str_res=ReplacePow(str_res);
+	
+		//Заменить модули [] на Math.abs()
+		var str_temp;
+		str_temp=str_res.replace(/\[([^\[\]]+)\]/, 'Math.abs($1)');
+		while (str_temp!=str_res){
+			str_res=str_temp;
+			str_temp=str_res.replace(/\[([^\[\]]+)\]/, 'Math.abs($1)');   
+		}
+		str_res=str_temp;
+	
+		return (str_res);
+		
+		
+		//-----------------------------------------------------------------------------
+		function ReplacePow(str_func){
+			var str_temp=str_func, base="", exponent="";
+			var baseStartIndex=0, exponentFinishIndex=0; //Эти переменные нужны для того, чтобы вырезать подстроку baseStartIndex-exponentFinishIndex и вставить на ее место полученное верное выражение
+			
+			var i=0, str_tempLength=str_temp.length;
+			while (i<str_tempLength){
+				if (str_temp[i]=="^"){
+					GetBaseAndExponent();
+					str_temp=str_temp.substring(0, baseStartIndex)+"Math.pow("+base+","+exponent+")"+str_temp.substring(exponentFinishIndex+1);
+					str_tempLength=str_temp.length;
+					i=baseStartIndex-1+10;
+				}
+				i++;		
+			}		
+			return (str_temp);
+			
+			
+			function GetBaseAndExponent(){
+				if ((str_temp[i]!="^") || (i<=0) || (i>=str_temp.length)) return false;
+				
+				var baseFound=false, exponentFound=false;
+				var base_temp="", exponent_temp="";
+				
+				if (str_temp[i-1]!=")" && str_temp[i-1]!="]"){
+					var index=i-1;
+					while ((index>=0) && !baseFound){	
+						baseFound=SimpleCriteriyStop();
+						if (!baseFound) {
+							base_temp=str_temp[index]+base_temp;
+							baseStartIndex=index;
+						}				
+						index--;
+					}
+					base=base_temp;
+				}
+				else{
+					if (str_temp[i-1]=="]"){
+						leftBracket="[";
+						rightBracket="]";						
+					}
+					else{
+						leftBracket="(";
+						rightBracket=")";	
+					}
+					var index=i-2;
+					base_temp=str_temp[i-1];
+					countOpenedBracets=1;
+					while ((index>=0) && !baseFound){
+						base_temp=str_temp[index]+base_temp;
+						baseStartIndex=index;
+						if (str_temp[index]==leftBracket){
+								countOpenedBracets--;
+						} 
+						else if (str_temp[index]==rightBracket) countOpenedBracets++;
+						if (countOpenedBracets==0) baseFound=true;
+						index--;
+					}
+					if (index>="Math.pow".length-1)
+						if (str_temp.substring(index-7, index+1)=="Math.pow"){//Такое условие из-за длинный выражения "Math.pow", чтобы захватить его, если оно есть
+							base_temp="Math.pow"+base_temp;
+							baseStartIndex=index-7;
+						}
+					base=base_temp;
+				}
+				    //Ниже начинается выделение показателя степени
+					if (str_temp[i+1]=="-" || str_temp[i+1]=="+"){
+						exponent_temp=exponent_temp+str_temp[i+1];
+						exponentFinishIndex=i+1;
+						i++;
+					}
+					if (str_temp[i+1]!="(" && str_temp[i+1]!="[" && str_temp.substring(i+1, i+9)!="Math.pow"){
+						var index=i+1;
+						
+						while ((index<str_temp.length) && !exponentFound){	
+							exponentFound=SimpleCriteriyStop();
+							if (!exponentFound) {
+								exponent_temp=exponent_temp+str_temp[index];
+								exponentFinishIndex=index;
+							}						
+							index++;
+						}	
+						exponent=exponent_temp;
+					}
+					else{
+						if (str_temp[i+1]=="["){
+							leftBracket="[";
+							rightBracket="]";						
+						}
+						else{
+							leftBracket="(";
+							rightBracket=")";	
+						}
+						var index=i+1;
+						if (str_temp[index]=="(" || str_temp[index]=="[") {
+							index++;
+							exponent_temp=exponent_temp+str_temp[index-1];
+							exponentFinishIndex=index-1;
+						}
+						countOpenedBracets=1;
+						if (str_temp.substring(i+1, i+9)=="Math.pow"){
+							index=i+10;
+							exponent_temp=exponent_temp+"Math.pow(";
+							exponentFinishIndex=i+9;
+						}
+						while ((index<str_temp.length) && !exponentFound){
+							exponent_temp=exponent_temp+str_temp[index];
+							exponentFinishIndex=index;
+							if (str_temp[index]==leftBracket){
+								countOpenedBracets++;
+							} 
+							else if (str_temp[index]==rightBracket) countOpenedBracets--;
+							if (countOpenedBracets==0) exponentFound=true;
+							index++;
+						}
+						exponent=exponent_temp;						
+					}
+					if (str_temp[i]=="-" || str_temp[i]=="+") i--;//возвращаем не правомерно измененный i
+				return;
+				//-----------------------------------------
+				function SimpleCriteriyStop(){
+					if ((str_temp[index]=='+') || (str_temp[index]=='-') || (str_temp[index]=='*') || (str_temp[index]=='/') || (str_temp[index]=='^') || (str_temp[index]==')') || (str_temp[index]=='(') || (str_temp[index]==']') || (str_temp[index]=='[')) return true;
+					return false;
+				}				
+			}//GetBaseAndExponent	
+		}//ReplacePow
+	}//Transform
+	
+	//Если модули в функции str_func расставленны однозначно - заменяет их на соответствующие скобки"(,)", возвращает измененную строку
+	//Если модули в функции str_func расставленны не однозначно - возвращает false
+	function ReplaceModulesOnBrackets(str_func,leftBracket, rightBracket){
+		var str_temp=str_func;
+		var leftModuleFoundCount=0, rightModuleFoundCount=0,moduleCount=0;
+		var result;
+		
+		for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++)
+			if (str_temp[strIndex]=='|') moduleCount++;
+		if (moduleCount==0) {return str_temp;}//если нет модулей, то все верно и возвращается неизмененная строка
+		if (moduleCount%2!=0) {return false;}//если модулей нечетное кол-во, то ошибка, результат - false
+				
+		//Первый модуль - левый, последний модуль - правый
+		var i=0, moduleFound=false;
+		while((i<str_temp.length) && (!moduleFound)){
+			if (str_temp[i]=='|'){
+				moduleFound=true;
+				str_temp=str_temp.substring(0, i)+leftBracket+str_temp.substring(i+1);//Т.к. строки не изменяемые и нельзя написать str_temp[i]='(';, то используется такой метод
+				leftModuleFoundCount++;
+	       	}
+			i++;
+		}
+		moduleFound=false;
+		i=str_temp.length-1;
+		while((0<=i) && (!moduleFound)){
+			if (str_temp[i]=='|'){
+				moduleFound=true;
+				str_temp=str_temp.substring(0, i)+rightBracket+str_temp.substring(i+1);//Т.к. строки не изменяемые и нельзя написать str_temp[i]=')';, то используется такой метод
+				rightModuleFoundCount++;
+			}
+			i--;
+		}
+								
+		for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++){
+			if (str_temp[strIndex]!='|') continue;
+			if (TypeOfModule()==-1) {
+				str_temp=str_temp.substring(0, strIndex)+leftBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]='(';, то используется такой метод
+				leftModuleFoundCount++;
+			}
+			else if (TypeOfModule==1) {
+				str_temp=str_temp.substring(0, strIndex)+rightBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]=')';, то используется такой метод 
+				rightModuleFoundCount++;
+			}
+		}
+			
+		/*		
+		if (leftModuleFoundCount==(moduleCount/2)){
+			for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++) 
+				if (str_temp[strIndex]=='|') str_temp=str_temp.substring(0, strIndex)+rightBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]=')';, то используется такой метод
+			return str_temp;
+		}
+		if (rightModuleFoundCount==(moduleCount/2)){
+			for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++) 
+				if (str_temp[strIndex]=='|') str_temp=str_temp.substring(0, strIndex)+leftBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]='(';, то используется такой метод
+			return str_temp;
+		}*/
+		
+		for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++){
+			if (str_temp[strIndex]!='|') continue;
+			if (str_temp[strIndex-1]==leftBracket){
+				str_temp=str_temp.substring(0, strIndex)+leftBracket+str_temp.substring(strIndex+1);
+				leftModuleFoundCount++;
+			}
+			else if (str_temp[strIndex+1]==rightBracket){
+				str_temp=str_temp.substring(0, strIndex)+rightBracket+str_temp.substring(strIndex+1);
+				rightModuleFoundCount++;
+			}
+		}
+		if (leftModuleFoundCount==(moduleCount/2)){
+			for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++) 
+				if (str_temp[strIndex]=='|') str_temp=str_temp.substring(0, strIndex)+rightBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]=')';, то используется такой метод
+			return str_temp;
+		}
+		if (rightModuleFoundCount==(moduleCount/2)){
+			for(var strIndex=0, len=str_temp.length; strIndex<len; strIndex++) 
+				if (str_temp[strIndex]=='|') str_temp=str_temp.substring(0, strIndex)+leftBracket+str_temp.substring(strIndex+1);//Т.к. строки не изменяемые и нельзя написать str_temp[strIndex]='(';, то используется такой метод
+			return str_temp;
+		}
+		
+		return false;	
+		//---------------------------------------------------------------------------------
+		//Если str_temp[strIndex] левый модуль, возвращает -1
+		//Если str_temp[strIndex] правый модуль, возвращает 1
+		//Если str_temp[strIndex] непонятно, возвращает 0
+		function TypeOfModule(){
+			var res=0;
+			if ((str_temp[strIndex-1]=='-') || (str_temp[strIndex-1]=='+') || (str_temp[strIndex-1]=='*') || (str_temp[strIndex-1]=='/') || (str_temp[strIndex-1]=='^') || (str_temp[strIndex-1]=='('))
+				res=-1;
+			if ((str_temp[strIndex+1]=='^') || (str_temp[strIndex+1]==')') || (str_temp[strIndex+1]=='*') || (str_temp[strIndex+1]=='/'))
+				res=1;					
+			return res;
+		}
+	}//ReplaceModulesOnBrackets
+	
+	//Возвращает значение функции function_str в точке (x1,x2)
+	function GetFunctionValue(function_str, x1, x2){
+		var value=0, function_str_temp=function_str;
+		
+		function_str_temp=function_str_temp.replace(firstVariable,'('+x1.toString()+')');
+		function_str_temp=function_str_temp.replace(secondVariable,'('+x2.toString()+')');
+		
+		value=eval(function_str_temp);
+
+		return value;
+	}
+	
+	
+	//Вычисляет начальные параметры zoom'а. Если линия уровня в элементе [0] самая большая, то начальный zoom = 0, zoomDirect=1. иначе zoom=logArray.length-1; zoomDirect=-1;
+	function CalcZoom(){		
+		var minLeft=logArray[0][0].x, maxRight=logArray[0][0].x, minBottom=logArray[0][0].y, maxTop=logArray[0][0].y;
+		var length=logArray[0].length
+		for (var i=0; i<length; i++){
+			if (logArray[0][i].x<minLeft) minLeft=logArray[0][i].x;
+			if (logArray[0][i].x>maxRight) maxRight=logArray[0][i].x;
+			if (logArray[0][i].y<minBottom) minBottom=logArray[0][i].y;
+			if (logArray[0][i].y>maxTop) maxTop=logArray[0][i].y;		
+		}
+			
+		var widthChartLeftLine=Math.abs(maxRight-minLeft);
+		var heightChartLeftLine=Math.abs(maxTop-minBottom);
+		
+		minLeft=logArray[logArray.length-1][0].x, maxRight=logArray[logArray.length-1][0].x, minBottom=logArray[logArray.length-1][0].y, maxTop=logArray[logArray.length-1][0].y;
+		length=logArray[logArray.length-1].length
+		for (var i=0; i<length; i++){
+			if (logArray[logArray.length-1][i].x<minLeft) minLeft=logArray[logArray.length-1][i].x;
+			if (logArray[logArray.length-1][i].x>maxRight) maxRight=logArray[logArray.length-1][i].x;
+			if (logArray[logArray.length-1][i].y<minBottom) minBottom=logArray[logArray.length-1][i].y;
+			if (logArray[logArray.length-1][i].y>maxTop) maxTop=logArray[logArray.length-1][i].y;		
+		}
+			
+		var widthChartRightLine=Math.abs(maxRight-minLeft);
+		var heightChartRightLine=Math.abs(maxTop-minBottom);
+		
+		if ((widthChartLeftLine>=widthChartRightLine) && (heightChartLeftLine>=heightChartRightLine)){
+			logArray.zoom=0;
+			logArray.zoomDirection=1;
+		}
+		else if ((widthChartLeftLine<widthChartRightLine) && (heightChartLeftLine<heightChartRightLine)){
+			logArray.zoom=logArray.length-1;
+			logArray.zoomDirection=-1;
+		}
+		else if (Math.abs(widthChartLeftLine-widthChartRightLine)>Math.abs(heightChartLeftLine-heightChartRightLine)){
+				if (widthChartLeftLine>widthChartRightLine) {
+					logArray.zoom=0;
+					logArray.zoomDirection=1;
+				}
+				else{
+					logArray.zoom=logArray.length-1;
+					logArray.zoomDirection=-1;
+				}
+		}
+		else {
+			if (heightChartLeftLine>heightChartRightLine) {
+					logArray.zoom=0;
+					logArray.zoomDirection=1;
+			}
+			else{
+				logArray.zoom=logArray.length-1;
+				logArray.zoomDirection=-1;
+			}
+		}
+		
+		for (var i=0; i<logArray.length-1;i++)
+			colorArray[i]='rgb('+Math.floor(Math.random() * 256).toString()+','+Math.floor(Math.random() * 256).toString()+','+Math.floor(Math.random() * 256).toString()+')';
+	}
+	
+	//Изображает данные массива logArray на холсте canvas
+	function DrawData(){
+		
+		var canvas=document.getElementById('drawpage');
+		var context=canvas.getContext('2d');
+		var widthCanvas=canvas.width, heightCanvas=canvas.height;
+		
+		
+		canvas.width=canvas.width;
+		
+		
+		
+		CanvasBackground();		
+		CanvasAxis();
+	
+		
+		var widthChart=0, heightChart=0, originChart={x:0,y:0}, minLeftChart=0, maxRightChart=0, minBottomChart=0, maxTopChart=0;
+		var step=0, offsetWidth=50, offsetHeight=40;
+		AnalysisChart();
+		var step=(canvas.height-offsetHeight-10)/heightChart;
+		if (heightChart==0 && widthChart==0){
+			step=1;
+			offsetWidth-=10;
+			offsetHeight-=10;
+		}
+		context.textBaseline = "top";
+		context.font="bold 9px sans-serif";
+		context.fillText("("+(originChart.x-1/step*10).toFixed(3).toString()+";"+(originChart.y-1/step*10).toFixed(3).toString()+")",2,5);	
+		
+		
+		
+		for (var i=0; i<logArray.length; i++){
+			if (!(logArray[i])) continue;
+			context.beginPath();
+			context.fillStyle=colorArray[i];
+			for (var j=0; j<logArray[i].length; j++)
+				if (i==logArray.zoom) context.fillRect((logArray[i][j].x-originChart.x)*step+offsetWidth-4,(logArray[i][j].y-originChart.y)*step+offsetHeight-4,8,8);//вывод точки logArray[i][j]
+				else context.fillRect((logArray[i][j].x-originChart.x)*step+offsetWidth-2,(logArray[i][j].y-originChart.y)*step+offsetHeight-2,4,4);//вывод точки logArray[i][j]
+		}	
+		
+		
+		
+		//вывод засечек крайних точек линии уровня в массштабе
+		context.beginPath();
+		context.moveTo((minLeftChart-originChart.x)*step+offsetWidth,offsetHeight-15);		
+		context.lineTo((minLeftChart-originChart.x)*step+offsetWidth,offsetHeight-5);
+		context.fillText(minLeftChart.toFixed(2).toString(),(minLeftChart-originChart.x)*step+offsetWidth-10,offsetHeight-10-15);
+		
+		context.moveTo((maxRightChart-originChart.x)*step+offsetWidth,offsetHeight-15);		
+		context.lineTo((maxRightChart-originChart.x)*step+offsetWidth,offsetHeight-5);
+		context.fillText(maxRightChart.toFixed(2).toString(),(maxRightChart-originChart.x)*step+offsetWidth-10,offsetHeight-10-15);
+		
+		context.moveTo(offsetWidth-15,(minBottomChart-originChart.y)*step+offsetHeight);
+		context.lineTo(offsetWidth-5,(minBottomChart-originChart.y)*step+offsetHeight);
+		context.fillText(minBottomChart.toFixed(2).toString(),offsetWidth-10-25,(minBottomChart-originChart.y)*step+offsetHeight-3);
+
+		context.moveTo(offsetWidth-15,(maxTopChart-originChart.y)*step+offsetHeight);
+		context.lineTo(offsetWidth-5,(maxTopChart-originChart.y)*step+offsetHeight);
+		context.fillText(maxTopChart.toFixed(2).toString(),offsetWidth-10-25,(maxTopChart-originChart.y)*step+offsetHeight-3);
+		
+		context.lineWidth = 1;
+		context.strokeStyle = "green";
+		context.stroke();
+		
+		/*context.beginPath();
+		context.lineWidth = 7;
+		context.moveTo(-200, -200);
+		context.lineTo(200, 200);
+		context.stroke();*/
+		
+		
+		return;
+		//----------------------------------------------
+		//на основе точек logArray (от a до b) заполняет переменные widthChart-расстояние от самой левой до самой правой точки, heightChart-верх-низ, origin - начало координат вывода, т.е. левый нижний угол
+		function AnalysisChart(){
+			//Переменная zoomDirect=1 если линии уровня расширяются по порядку, =-1 если в обратном порядке следования в массиве
+			originChart.x=0;
+			originChart.y=0;
+			
+			var minLeft=logArray[logArray.zoom][0].x, maxRight=logArray[logArray.zoom][0].x, minBottom=logArray[logArray.zoom][0].y, maxTop=logArray[logArray.zoom][0].y;
+			
+			var length=logArray[logArray.zoom].length
+			for (var i=0; i<length; i++){
+				if (logArray[logArray.zoom][i].x<minLeft) minLeft=logArray[logArray.zoom][i].x;
+				if (logArray[logArray.zoom][i].x>maxRight) maxRight=logArray[logArray.zoom][i].x;
+				if (logArray[logArray.zoom][i].y<minBottom) minBottom=logArray[logArray.zoom][i].y;
+				if (logArray[logArray.zoom][i].y>maxTop) maxTop=logArray[logArray.zoom][i].y;		
+			}
+			
+			widthChart=Math.abs(maxRight-minLeft);
+			heightChart=Math.abs(maxTop-minBottom);
+			
+			minLeftChart=minLeft;
+			maxRightChart=maxRight;
+			minBottomChart=minBottom;			
+			maxTopChart=maxTop;
+			
+			originChart.x=minLeft;
+			originChart.y=minBottom;
+			
+			return;		
+		}
+		//----------------------------		
+		//Выводит оси координат на канву и кнопки массштаба
+		function CanvasAxis(){
+			
+			var canvas=document.getElementById('drawpage');
+			var context=canvas.getContext('2d');
+			
+			context.strokeStyle="#000";
+			//горизонтальная стрелка
+			context.beginPath();
+			context.moveTo(0,30);
+			context.lineTo(240,30);
+			context.moveTo(260,30);
+			context.lineTo(498,30);
+			context.moveTo(493,25);
+			context.lineTo(498,30);
+			context.lineTo(493,35);
+		
+			//вертикальная стрелка
+			context.moveTo(40,0);
+			context.lineTo(40,120);
+			context.moveTo(40,140);
+			context.lineTo(40,300);
+			context.moveTo(45,295);
+			context.lineTo(40,300);
+			context.lineTo(35,295);		
+		
+			
+			context.stroke();
+		
+			context.font="bold 12px sans-serif";
+			context.fillText("I", 249, 33);
+			context.fillText("II", 37, 134);
+			
+			//Кнопки массштаба
+			context.beginPath();
+			context.lineWidth=4;
+			context.fillStyle="rgb(10,100,164)"; //Цвет заливки
+			context.strokeStyle="white"; //Цвет самой линии
+			context.fillRect(440,5,20,20);
+			context.moveTo(443, 15);
+			context.lineTo(457, 15);
+			
+			context.fillRect(465,5,20,20);
+			context.moveTo(468, 15);
+			context.lineTo(482, 15);
+			context.moveTo(475, 8);
+			context.lineTo(475, 22);
+			
+			context.stroke();
+			context.closePath();
+			
+		
+			return;
+		}//CanvasAxis
+		return;
+	}//DrawData
+  
+  </script>
+</head>
+
+<body>
+
+<div id="wrap">
+<header class="group">
+<nav>
+  <ul id="main-nav">
+    <li><a href="main.html">главная</a></li>
+	<li class="active"><a href="level_lines.html">линии уровня</a></li>
+	<li><a href="test_page.html">тестовая функция</a></li>
+	<li><a href="search_min.html">поиск минимума</a></li>
+	<li><a href="about.html">о нас</a></li>
+  </ul>
+</nav>
+</header>
+<div id="wrap-content">
+<div class="group">
+
+<div id="entry">
+	<p>Для построения линий уровня функции заполните форму ниже и нажмите кнопку "построить".</p>
+</div>
+<div id="input_data">
+ <form method="post" action="handler.php">
+   <table>
+	<tr>
+		<td width="75"> </td>
+		<td width="149" align="left"><label for="function-field"><span class="tooltip">функция y=<span class="help_message">Функция двух переменных. Допустимые операции: +,-,*,/,(),||,^, где: <ul> <li>^ - степень, x^2</li><li>|| - модуль, |x|</li> </ul></span></span></label></td>
+		<td colspan="3"><input type="text" name="function-field" id="function-field" placeholder="например x1^2+x2^2"></td>
+		<td width="75"><span class="error_message" id="err-function-field">Неверный формат функции</span> </td>
+	</tr> 
+	<tr> 
+	 <td width="75"><span class="error_message" id="err-x1-field">Неверный формат</span> </td>
+     <td align="left"><label for="x1-field"><span class="tooltip">интервал x<sub>1</sub><span class="help_message">Интервал изменения переменной x1, должен вводиться в формате: from-to. Например: 1-2,-1-2,1--2,-1--2.</span></span></label></td>
+     <td width="100"><input type="text" name="x1-field" id="x1-field" placeholder="0-0"></td>
+	 <td width="149" align="right"><label for="dx1-field"><span class="tooltip">dx<sub>1</sub><span class="help_message">Шаг изменения переменной x1, следующее значение x1 будет равно: x1+dx1.</span></span></label></td>
+	 <td width="100" align="right"><input type="text" name="dx1-field" id="dx1-field" placeholder="0"></td>
+     <td width="75"> <span class="error_message" id="err-dx1-field">Ожидается число</span></td>
+	</tr>
+	<tr> 
+	 <td width="75"><span class="error_message" id="err-x2-field">Неверный формат</span></td>
+     <td align="left"><label for="x2-field"><span class="tooltip">интервал x<sub>2</sub><span class="help_message">Интервал изменения переменной x2, должен вводиться в формате: from-to. Например: 1-2,-1-2,1--2,-1--2.</span></span></label></td>
+     <td width="100"><input type="text" name="x2-field" id="x2-field" placeholder="0-0"></td>
+	 <td width="149" align="right"><label for="dx2-field"><span class="tooltip">dx<sub>2</sub><span class="help_message">Шаг изменения переменной x2, следующее значение x1 будет равно: x2+dx2.</span></span></label></td>
+	 <td width="100" align="right"><input type="text" name="dx2-field" id="dx2-field" placeholder="0"></td>
+     <td width="75"> <span class="error_message" id="err-dx2-field">Ожидается число</span></td>
+	</tr>
+	<tr>
+	 <td width="75"><span class="error_message" id="err-С-field">Неверный формат</span></td>
+     <td align="left"><label for="C-field"><span class="tooltip">интервал C<span class="help_message">Интервал изменения высот линий уровня, должен вводиться в формате: from-to. Например: 1-2,-1-2,1--2,-1--2.</span></span></label></td>
+     <td><input type="text" name="C-field" id="C-field" placeholder="0-0"></td>
+	 <td align="right"><label for="dC-field"><span class="tooltip">dC<span class="help_message">Шаг изменения высоты линий уровня, следующее значение C будет равно: C+dC.</span></span></label></td>
+	 <td align="right"><input type="text" name="dC-field" id="dC-field" placeholder="0"></td>
+     <td width="75"><span class="error_message" id="err-dC-field">Ожидается число</span></td>
+	</tr>
+	<tr> 
+	 <td width="75"><span class="error_message" id="err-eps-field">Ожидается положительное число</span></td>
+     <td align="left"><label for="eps-field"><span class="tooltip">точность<span class="help_message">Точнось построения. Чем меньше - тем точнее построение. Положительное число.</span></span></label></td>
+     <td><input type="text" name="eps-field" id="eps-field" placeholder="0.01"></td>
+	</tr>
+	<tr> 
+	 <td width="75"></td>
+     <td colspan="2"><input type="reset" value="сброс" name="reset-data" id="reset-data"></td>
+     <td colspan="2"><input type="button" value="построить" name="calc-data" id="calc-data" onClick="CalculateForm()"></td>
+     <td width="75"></td>
+	</tr>    
+   </table>
+ </form>
+</div>
+
+<div id="show_data">
+ <div id="canvas">
+	<canvas id="drawpage" width="498px" height="300px">К сожалению графическая визуализация недоступна для вашего браузера</canvas>
+  </div>
+</div>
+
+</div>
+</div>
+<footer>
+	<ul id="footer-nav">
+		<li><a href="main.html">главная</a></li>
+		<li><a href="about.html">контакты</a></li>
+		<li><a href="about.html">о нас</a></li>
+	</ul>
+ Все права защищены и охраняются законом. Copyright © ООО "Крутые парни" 2013+
+</footer>
+</div> <!-- wrap -->
+
+</body>
+</html>
